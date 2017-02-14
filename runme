@@ -1,0 +1,5 @@
+#!/bin/bash
+
+sudo make -f Makefile.cvs
+./configure --enable-debug --with-proj-gdal=/usr
+make -j4
