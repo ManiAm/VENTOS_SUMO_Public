@@ -1,0 +1,48 @@
+# Compiled source
+*.o
+*.so
+*.a
+*.in
+**Makefile
+
+# files in root
+/INSTALL
+/aclocal.m4
+/autom4te.cache/
+/compile
+/config.guess
+/config.log
+/config.status
+/config.sub
+/configure
+/depcomp
+/install-sh
+/libtool
+/ltmain.sh
+/missing
+
+# executable
+/src/netconvert
+/src/od2trips
+/src/sumo
+/src/sumo-gui
+/src/config.h
+/src/activitygen/activitygen
+/src/dfrouter/dfrouter
+/src/duarouter/duarouter
+/src/jtrrouter/jtrrouter
+/src/marouter/marouter
+/src/netedit/netedit
+/src/netgen/netgenerate
+/src/netimport/typemap.h
+/src/polyconvert/polyconvert
+/src/stamp-h1
+/src/tools/emissionsDrivingCycle
+/src/tools/emissionsMap
+/src/traci_testclient/TraCITestClient
+
+# directory
+.deps/
+
+
+
