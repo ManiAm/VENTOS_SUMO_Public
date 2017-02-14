@@ -525,6 +525,60 @@ const SUMOVehicleParserHelper::CFAttrMap&
 SUMOVehicleParserHelper::getAllowedCFModelAttrs() {
     // init on first use
     if (allowedCFModelAttrs.size() == 0) {
+        
+        // mani starts
+        std::set<SumoXMLAttr> optimalSpeed;
+        optimalSpeed.insert(SUMO_ATTR_MAXACCEL);
+        optimalSpeed.insert(SUMO_ATTR_MAXDECEL);
+        optimalSpeed.insert(SUMO_ATTR_TG);
+        optimalSpeed.insert(SUMO_ATTR_SIGMA);
+        optimalSpeed.insert(SUMO_ATTR_TAU);
+        optimalSpeed.insert(SUMO_ATTR_SENSITIVITY);
+        allowedCFModelAttrs[SUMO_TAG_CF_OPTIMALSPEED] = optimalSpeed; 
+        
+        std::set<SumoXMLAttr> krausFixedParams;
+        krausFixedParams.insert(SUMO_ATTR_MAXACCEL);
+        krausFixedParams.insert(SUMO_ATTR_MAXDECEL);
+        krausFixedParams.insert(SUMO_ATTR_TG);        
+        krausFixedParams.insert(SUMO_ATTR_SIGMA);
+        krausFixedParams.insert(SUMO_ATTR_TAU);
+        allowedCFModelAttrs[SUMO_TAG_CF_KRAUSSFIXED] = krausFixedParams;        
+        
+        std::set<SumoXMLAttr> ACCParams;
+        ACCParams.insert(SUMO_ATTR_CONTROLLERNUMBER);
+        ACCParams.insert(SUMO_ATTR_MAXACCEL);
+        ACCParams.insert(SUMO_ATTR_MAXDECEL);
+        ACCParams.insert(SUMO_ATTR_TG);        
+        ACCParams.insert(SUMO_ATTR_SIGMA);
+        ACCParams.insert(SUMO_ATTR_TAU);        
+        ACCParams.insert(SUMO_ATTR_COMFACCEL);
+        ACCParams.insert(SUMO_ATTR_COMFDECEL);        
+        ACCParams.insert(SUMO_ATTR_KSC);
+        ACCParams.insert(SUMO_ATTR_KV);
+        ACCParams.insert(SUMO_ATTR_KG);
+        ACCParams.insert(SUMO_ATTR_VINT);        
+        allowedCFModelAttrs[SUMO_TAG_CF_ACC] = ACCParams;    
+        
+        std::set<SumoXMLAttr> CACCParams;
+        CACCParams.insert(SUMO_ATTR_CONTROLLERNUMBER);
+        CACCParams.insert(SUMO_ATTR_MAXACCEL);
+        CACCParams.insert(SUMO_ATTR_MAXDECEL);
+        CACCParams.insert(SUMO_ATTR_TG);        
+        CACCParams.insert(SUMO_ATTR_SIGMA);
+        CACCParams.insert(SUMO_ATTR_TAU);        
+        CACCParams.insert(SUMO_ATTR_COMFACCEL);
+        CACCParams.insert(SUMO_ATTR_COMFDECEL);        
+        CACCParams.insert(SUMO_ATTR_KSC);
+        CACCParams.insert(SUMO_ATTR_KV);
+        CACCParams.insert(SUMO_ATTR_KG);
+        CACCParams.insert(SUMO_ATTR_KA);
+        CACCParams.insert(SUMO_ATTR_VINT);
+        CACCParams.insert(SUMO_ATTR_KV_F);
+        CACCParams.insert(SUMO_ATTR_KG_F);        
+        allowedCFModelAttrs[SUMO_TAG_CF_CACC] = CACCParams;
+
+        // mani ends 
+
         std::set<SumoXMLAttr> krausParams;
         krausParams.insert(SUMO_ATTR_ACCEL);
         krausParams.insert(SUMO_ATTR_DECEL);

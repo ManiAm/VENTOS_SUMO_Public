@@ -435,6 +435,20 @@ MSNet::simulationStep() {
         return;
     }
 #endif
+    
+
+    // mani starts
+//    char buffer1 [900];
+//    sprintf (buffer1, "#########################");
+//    WRITE_MESSAGE(buffer1);    
+//    
+//     char buffer2 [900];
+//    sprintf (buffer2, "\nStart simulation for TS=%.2f ... \n", myStep/1000.);
+//    WRITE_MESSAGE(buffer2);
+    // mani ends
+
+
+
     // execute beginOfTimestepEvents
     if (myLogExecutionTime) {
         mySimStepDuration = SysUtils::getCurrentMillis();
@@ -525,6 +539,19 @@ MSNet::simulationStep() {
         mySimStepDuration = SysUtils::getCurrentMillis() - mySimStepDuration;
         myVehiclesMoved += myVehicleControl->getRunningVehicleNo();
     }
+    
+
+    // mani starts
+//    char buffer3 [900];
+//    sprintf (buffer3, "\nEnd simulation for TS=%.2f\n", myStep/1000.);
+//    WRITE_MESSAGE(buffer3);
+//    
+//    char buffer4 [900];
+//    sprintf (buffer4, "#########################\n");
+//    WRITE_MESSAGE(buffer4); 
+    // mani ends  
+
+
     myStep += DELTA_T;
 }
 

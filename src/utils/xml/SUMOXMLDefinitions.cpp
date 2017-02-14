@@ -161,6 +161,15 @@ StringBijection<int>::Entry SUMOXMLDefinitions::tags[] = {
     { "scalingScheme",              SUMO_TAG_SCALINGSCHEME },
     { "entry",                      SUMO_TAG_ENTRY },
     { "vehicleTransfer",            SUMO_TAG_VEHICLETRANSFER },
+    
+    // mani starts
+    { "carFollowing-OptimalSpeed",SUMO_TAG_CF_OPTIMALSPEED },
+    { "carFollowing-KraussFixed", SUMO_TAG_CF_KRAUSSFIXED },
+    { "carFollowing-ACC",SUMO_TAG_CF_ACC },
+    { "carFollowing-CACC",SUMO_TAG_CF_CACC },
+    // mani ends
+
+
     // Cars
     { "carFollowing-IDM",           SUMO_TAG_CF_IDM },
     { "carFollowing-IDMM",          SUMO_TAG_CF_IDMM },
@@ -291,6 +300,25 @@ StringBijection<int>::Entry SUMOXMLDefinitions::attrs[] = {
     { "tmp3",                   SUMO_ATTR_TMP3 },
     { "tmp4",                   SUMO_ATTR_TMP4 },
     { "tmp5",                   SUMO_ATTR_TMP5 },
+
+
+    // mani starts
+   { "controllerNumber", SUMO_ATTR_CONTROLLERNUMBER },
+   { "MaxAccel",       SUMO_ATTR_MAXACCEL },
+   { "MaxDecel",       SUMO_ATTR_MAXDECEL },
+   { "ComfAccel",      SUMO_ATTR_COMFACCEL },
+   { "ComfDecel",      SUMO_ATTR_COMFDECEL },
+   { "T_g",            SUMO_ATTR_TG },
+   { "sensitivity",    SUMO_ATTR_SENSITIVITY },
+   { "K_sc",           SUMO_ATTR_KSC },
+   { "K_v",            SUMO_ATTR_KV },
+   { "K_g",            SUMO_ATTR_KG },
+   { "K_a",            SUMO_ATTR_KA },
+   { "V_int",          SUMO_ATTR_VINT },
+   { "K_v_f",          SUMO_ATTR_KV_F },
+   { "K_g_f",          SUMO_ATTR_KG_F },
+   // mani ends
+
 
     { "lcStrategic",            SUMO_ATTR_LCA_STRATEGIC_PARAM },
     { "lcCooperative",          SUMO_ATTR_LCA_COOPERATIVE_PARAM },

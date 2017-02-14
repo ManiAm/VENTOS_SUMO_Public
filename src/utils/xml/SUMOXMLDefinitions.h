@@ -257,6 +257,15 @@ enum SumoXMLTag {
     SUMO_TAG_CF_WIEDEMANN,
     /// @}
 
+
+    // mani starts
+    SUMO_TAG_CF_OPTIMALSPEED,
+    SUMO_TAG_CF_KRAUSSFIXED,
+    SUMO_TAG_CF_ACC,
+    SUMO_TAG_CF_CACC,
+    // mani ends
+
+
     /// @name Pedestrians
     /// @{
     SUMO_TAG_PERSON,
@@ -312,6 +321,18 @@ enum SumoXMLTag {
     AGEN_TAG_ENTRANCE,
     /// @brief parameters
     AGEN_TAG_PARAM
+};
+
+
+// mani
+enum CFMODES {
+    Mode_Undefined,
+    Mode_NoData,
+    Mode_DataLoss,
+    Mode_SpeedControl,
+    Mode_GapControl,
+    Mode_EmergencyBrake,
+    Mode_Stopped
 };
 
 
@@ -424,6 +445,25 @@ enum SumoXMLAttr {
     SUMO_ATTR_TMP4,
     SUMO_ATTR_TMP5,
     /// @}
+
+
+    // mani starts
+    SUMO_ATTR_CONTROLLERNUMBER,
+    SUMO_ATTR_MAXACCEL,
+    SUMO_ATTR_MAXDECEL,
+    SUMO_ATTR_COMFACCEL,
+    SUMO_ATTR_COMFDECEL,
+    SUMO_ATTR_TG,
+    SUMO_ATTR_SENSITIVITY,   
+    SUMO_ATTR_KSC,
+    SUMO_ATTR_KV,
+    SUMO_ATTR_KG,  
+    SUMO_ATTR_KA, 
+    SUMO_ATTR_VINT,
+    SUMO_ATTR_KV_F,
+    SUMO_ATTR_KG_F,
+    // mani ends
+
 
     /// @name Lane changing model attributes
     /// @{

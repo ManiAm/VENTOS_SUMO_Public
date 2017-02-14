@@ -956,6 +956,24 @@ MSLane::getFirstVehicleInformation(const MSVehicle* ego, SUMOReal latOffset, boo
 void
 MSLane::planMovements(SUMOTime t) {
     assert(myVehicles.size() != 0);
+    
+    // mani starts
+    // get the following vehicle
+    MSVehicle* firstV = *(myVehicles.begin());
+    std::pair<MSVehicle* const, SUMOReal> v = getFollowerOnConsecutive( 1, firstV->getSpeed(), firstV->getCarFollowModel().getMaxDecel() );
+    const MSVehicle* followerV = v.first;    
+    
+    for (VehCont::iterator veh = myVehicles.begin(); veh != myVehicles.end(); ++veh) 
+    {
+        if ( (*veh)->getLane() == this ) 
+        {
+            (*veh)->followVeh.vehiclePtrSumo = followerV;
+        }
+        followerV = *veh;
+    }
+    // mani ends
+
+
     SUMOReal cumulatedVehLength = 0.;
     MSLeaderInfo ahead(this);
     // iterate over myVehicles and myPartialVehicles merge-sort style

@@ -89,7 +89,42 @@ TraCIServerAPI_Edge::processGet(TraCIServer& server, tcpip::Storage& inputStorag
         MSEdge::insertIDs(ids);
         tempMsg.writeUnsignedByte(TYPE_INTEGER);
         tempMsg.writeInt((int) ids.size());
-    } else {
+    } 
+
+
+    // mani start
+    // number of lanes
+    else if (variable == 0x03) {
+        MSEdge* e = MSEdge::dictionary(id);
+        int numLanes = e->getLanes().size();
+
+        tempMsg.writeUnsignedByte(TYPE_INTEGER);
+        tempMsg.writeInt((int) numLanes);
+    }
+    // allowed lanes
+    else if (variable == 0x04) {
+        std::string vehClass_str = "";
+        if (!server.readTypeCheckingString(inputStorage, vehClass_str)) {
+            return server.writeErrorStatusCmd(CMD_GET_VEHICLE_VARIABLE, "vehClass retrieval requires a string.", outputStorage);
+        }
+
+        SUMOVehicleClass vehClass = getVehicleClassID(vehClass_str);
+
+        std::vector<std::string> ids;
+
+        MSEdge* e = MSEdge::dictionary(id);
+        const std::vector<MSLane*> *allowed = e->allowedLanes(vehClass);
+        // iterate over lanes
+        for(std::vector<MSLane*>::const_iterator it = allowed->begin(); it != allowed->end(); ++it)
+            ids.push_back((*it)->getID());
+
+        tempMsg.writeUnsignedByte(TYPE_STRINGLIST);
+        tempMsg.writeStringList(ids);
+    }
+    // mani end
+
+
+else {
         MSEdge* e = MSEdge::dictionary(id);
         if (e == 0) {
             return server.writeErrorStatusCmd(CMD_GET_EDGE_VARIABLE, "Edge '" + id + "' is not known", outputStorage);

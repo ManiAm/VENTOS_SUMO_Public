@@ -417,6 +417,14 @@ TraCIServer::dispatchCommand() {
                 break;
             case CMD_SIMSTEP2: {
                 SUMOTime nextT = myInputStorage.readInt();
+
+                // mani starts                
+//                char buffer1 [900];
+//                sprintf (buffer1, "Received command from OMNET++ to perform simulation for step t=%.3f\n", nextT/1000.);
+//                WRITE_MESSAGE(buffer1); 
+                // mani ends
+
+
                 success = true;
                 if (nextT != 0) {
                     myTargetTime = nextT;

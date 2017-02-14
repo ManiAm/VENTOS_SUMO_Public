@@ -561,6 +561,19 @@ MSVehicle::MSVehicle(SUMOVehicleParameter* pars, const MSRoute* route,
     }
     myLaneChangeModel = MSAbstractLaneChangeModel::build(type->getLaneChangeModel(), *this);
     myCFVariables = type->getCarFollowModel().createVehicleVariables();
+
+    // mani starts
+    degradeToACC = false;
+    debug = false;
+    errorGap = 0;
+    errorRelSpeed = 0;
+    
+    myCFMode = Mode_Undefined;
+    
+    followVeh = myNeighboringVehicle_t();
+    precedingVeh = myNeighboringVehicle_t();
+    platoonLeaderVeh = myNeighboringVehicle_t();
+    // mani ends
 }
 
 
@@ -2288,6 +2301,8 @@ MSVehicle::updateState(SUMOReal vNext) {
         myLane = myLane->getOpposite();
     }
     myState.myPos += deltaPos;
+    // mani
+    // myState.myPos += 1/2 * myAcceleration * (pow(TS,2)) + SPEED2DIST(vNext);
     myState.myLastCoveredDist = deltaPos;
 
     myCachedPosition = Position::INVALID;

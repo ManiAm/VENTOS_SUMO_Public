@@ -62,6 +62,11 @@
 //#define DEBUG_MOVEXY 1
 //#define DEBUG_MOVEXY_ANGLE 1
 
+// mani headers
+#include "microsim/cfmodels/MSCFModel_CACC.h"
+#include "microsim/traffic_lights/MSTLLogicControl.h"
+#include <string.h>
+
 
 // ===========================================================================
 // static member variables
@@ -103,6 +108,12 @@ TraCIServerAPI_Vehicle::processGet(TraCIServer& server, tcpip::Storage& inputSto
             && variable != VAR_SPEEDSETMODE
             && variable != VAR_NEXT_TLS
             && variable != VAR_SLOPE
+
+            && variable != 0x72  // mani
+            && variable != 0x73  // mani
+            && variable != 0x74  // mani 
+            && variable != 0x75  // mani
+
             && variable != VAR_HEIGHT
             && variable != VAR_LINE
             && variable != VAR_VIA
@@ -143,6 +154,28 @@ TraCIServerAPI_Vehicle::processGet(TraCIServer& server, tcpip::Storage& inputSto
         const bool onRoad = v->isOnRoad();
         const bool visible = onRoad || v->isParking();
         switch (variable) {
+
+
+            // mani starts
+            case 0x72:   // get controller type
+                tempMsg.writeUnsignedByte(TYPE_INTEGER);
+                tempMsg.writeInt(onRoad ? v->getCarFollowModel().getModelID() : INVALID_INT_VALUE);
+                break;
+            case 0x73:   // get controller number
+                tempMsg.writeUnsignedByte(TYPE_INTEGER);
+                tempMsg.writeInt(onRoad ? v->getCarFollowModel().getControllerNumber() : INVALID_INT_VALUE);
+                break;
+            case 0x74:   // get the current acceleration
+                tempMsg.writeUnsignedByte(TYPE_DOUBLE);
+                tempMsg.writeDouble(onRoad ? v->getAcceleration() : INVALID_DOUBLE_VALUE);
+                break;      
+            case 0x75:   // get the car-following model mode
+                tempMsg.writeUnsignedByte(TYPE_INTEGER);
+                tempMsg.writeInt(onRoad ? v->myCFMode : INVALID_INT_VALUE);
+                break;
+            // mani ends
+
+
             case VAR_SPEED:
                 tempMsg.writeUnsignedByte(TYPE_DOUBLE);
                 tempMsg.writeDouble(visible ? v->getSpeed() : INVALID_DOUBLE_VALUE);
@@ -524,6 +557,8 @@ TraCIServerAPI_Vehicle::processSet(TraCIServer& server, tcpip::Storage& inputSto
             && variable != VAR_HEIGHT
             && variable != VAR_LINE
             && variable != VAR_VIA
+            // mani
+            && variable != 0x15 && variable != 0x16 && variable != 0x17 && variable != 0x20 && variable != 0x21 && variable != 0x22 && variable != 0x23 && variable != 0x24
             && variable != MOVE_TO_XY && variable != VAR_PARAMETER/* && variable != VAR_SPEED_TIME_LINE && variable != VAR_LANE_TIME_LINE*/
        ) {
         return server.writeErrorStatusCmd(CMD_SET_VEHICLE_VARIABLE, "Change Vehicle State: unsupported variable " + toHex(variable, 2) + " specified", outputStorage);
@@ -546,7 +581,251 @@ TraCIServerAPI_Vehicle::processSet(TraCIServer& server, tcpip::Storage& inputSto
     }
     const bool onInit = v == 0 || v->getLane() == 0;
     switch (variable) {
-        case CMD_STOP: {
+        
+
+        // mani starts       
+        
+        // set v_p, b_p, etc in a specific vehicle
+        case 0x15: 
+        {            
+            std::string str;
+            
+            if (!server.readTypeCheckingString(inputStorage, str)) 
+            {
+                return server.writeErrorStatusCmd(CMD_SET_VEHICLE_VARIABLE, "Setting speed requires a string.", outputStorage);
+            }
+            
+            // try to tokenize!
+            std::stringstream speed;
+            std::stringstream accel;
+            std::stringstream maxDecel;     
+            std::stringstream timeStamp; 
+            std::stringstream sender; 
+            std::stringstream senderRole; 
+            
+            int count = 0;
+            
+            for(int i=0;i<str.length();i++)
+            {
+                if(str[i] == '#')
+                {
+                    count++;
+                    continue;
+                }
+                
+                if(count == 0)                
+                    speed << str[i];
+                else if(count == 1)
+                    accel << str[i];
+                else if(count == 2)
+                    maxDecel << str[i];
+                else if(count == 3)
+                    timeStamp << str[i];
+                else if(count == 4)
+                    sender << str[i];
+                else if(count == 5)
+                    senderRole << str[i];
+            }           
+
+            if( std::string("preceding") == senderRole.str() )
+            {
+                v->precedingVeh.vehicleNameOmnet = sender.str();
+                v->precedingVeh.velocityOmnet = atof(speed.str().c_str());
+                v->precedingVeh.accelOmnet = atof(accel.str().c_str());
+                v->precedingVeh.maxDecelOmnet = atof(maxDecel.str().c_str());
+                v->precedingVeh.timeStampOmnet = atof(timeStamp.str().c_str());
+                
+                if(v->debug)
+                {             
+                    char buffer [900];
+                    sprintf (buffer, "%s received data from preceding vehicle %s: "
+                                     "speed=%.3f, accel=%.3f, maxDecel=%.3f, TS=%.3f",
+                                     v->getID().c_str(),
+                                     sender.str().c_str(),
+                                     v->precedingVeh.velocityOmnet,
+                                     v->precedingVeh.accelOmnet,
+                                     v->precedingVeh.maxDecelOmnet,
+                                     (v->precedingVeh.timeStampOmnet)/1000.);
+                    WRITE_MESSAGE(buffer);
+                } 
+            }
+            else if( std::string("leader") == senderRole.str() )
+            {
+                v->platoonLeaderVeh.vehicleNameOmnet = sender.str();
+                v->platoonLeaderVeh.velocityOmnet = atof(speed.str().c_str());
+                v->platoonLeaderVeh.accelOmnet = atof(accel.str().c_str());
+                v->platoonLeaderVeh.maxDecelOmnet = atof(maxDecel.str().c_str());
+                v->platoonLeaderVeh.timeStampOmnet = atof(timeStamp.str().c_str());
+
+                if(v->debug)
+                {             
+                    char buffer [900];
+                    sprintf (buffer, "%s received data from platoon leader %s: "
+                                     "speed=%.3f, accel=%.3f, maxDecel=%.3f, TS=%.3f",
+                                     v->getID().c_str(),
+                                     sender.str().c_str(),
+                                     v->platoonLeaderVeh.velocityOmnet,
+                                     v->platoonLeaderVeh.accelOmnet,
+                                     v->platoonLeaderVeh.maxDecelOmnet,
+                                     (v->platoonLeaderVeh.timeStampOmnet)/1000.);
+                    WRITE_MESSAGE(buffer);
+                }                 
+            }
+            else
+            {
+                throw ProcessError("Sender role is not recognized!");
+            }
+        }
+        
+        break;
+        
+        case 0x16: 
+        {   
+            int debugging;
+            
+            if (!server.readTypeCheckingInt(inputStorage, debugging)) 
+            {
+                return server.writeErrorStatusCmd(CMD_SET_VEHICLE_VARIABLE, "debugging requires a int.", outputStorage);
+            }
+            
+            v->debug = (bool)debugging;  
+        }
+        
+        break;
+        
+        // change modeSwitch variable in a specific vehicle
+        case 0x17: 
+        {   
+            int modeSwitch;
+            
+            if (!server.readTypeCheckingInt(inputStorage, modeSwitch)) 
+            {
+                return server.writeErrorStatusCmd(CMD_SET_VEHICLE_VARIABLE, "modeSwitch requires a int.", outputStorage);
+            }
+            
+            v->degradeToACC = (bool)modeSwitch;  
+            
+            if(v->debug)
+            {           
+                char buffer [900];
+                sprintf (buffer, "%s received data from OMNET++ : degradeToACC=%d", v->getID().c_str(), v->degradeToACC);
+                WRITE_MESSAGE(buffer);  
+            }
+        }
+        
+        break; 
+
+        // set the ErrorGap
+        case 0x20:
+        {
+            double ErrorGap;
+            
+            if (!server.readTypeCheckingDouble(inputStorage, ErrorGap)) 
+            {
+                return server.writeErrorStatusCmd(CMD_SET_VEHICLE_VARIABLE, "ErrorGap requires a double.", outputStorage);
+            }
+            
+            v->errorGap = ErrorGap;  
+            
+            if(v->debug)
+            {           
+                char buffer [900];
+                sprintf (buffer, "%s received data from OMNET++ : ErrorGap=%f", v->getID().c_str(), v->errorGap);
+                WRITE_MESSAGE(buffer);  
+            }            
+        }
+        
+        break;
+        
+        // set the ErrorRelSpeed
+        case 0x21:
+        {
+            double ErrorRelSpeed;
+            
+            if (!server.readTypeCheckingDouble(inputStorage, ErrorRelSpeed)) 
+            {
+                return server.writeErrorStatusCmd(CMD_SET_VEHICLE_VARIABLE, "ErrorRelSpeed requires a double.", outputStorage);
+            }
+            
+            v->errorRelSpeed = ErrorRelSpeed;  
+            
+            if(v->debug)
+            {           
+                char buffer [900];
+                sprintf (buffer, "%s received data from OMNET++ : ErrorRelSpeed=%f", v->getID().c_str(), v->errorRelSpeed);
+                WRITE_MESSAGE(buffer);  
+            }            
+        }
+        
+        break;
+        
+        // set V_int
+        case 0x22:
+        {
+            double V_int;
+
+            if (!server.readTypeCheckingDouble(inputStorage, V_int))
+            {
+                return server.writeErrorStatusCmd(CMD_SET_VEHICLE_VARIABLE, "V_int requires a double.", outputStorage);
+            }
+
+            std::string vTypeID = v->getVehicleType().getID();
+            std::size_t found = vTypeID.find("@");
+            if (found != std::string::npos)
+                vTypeID.erase(found);
+
+            MSVehicleType* veh = MSNet::getInstance()->getVehicleControl().getVType(vTypeID);
+            veh->getCarFollowModel().setVint(V_int);
+        }
+
+        break;
+
+        // set ComfAccel
+        case 0x23:
+        {
+            double ComfAccel;
+
+            if (!server.readTypeCheckingDouble(inputStorage, ComfAccel))
+            {
+                return server.writeErrorStatusCmd(CMD_SET_VEHICLE_VARIABLE, "ComfAccel requires a double.", outputStorage);
+            }
+
+            std::string vTypeID = v->getVehicleType().getID();
+            std::size_t found = vTypeID.find("@");
+            if (found != std::string::npos)
+                vTypeID.erase(found);
+
+            MSVehicleType* veh = MSNet::getInstance()->getVehicleControl().getVType(vTypeID);
+            veh->getCarFollowModel().setComfAccel(ComfAccel);
+        }
+
+        break;
+
+        // set ComfDecel
+        case 0x24:
+        {
+            double ComfDecel;
+
+            if (!server.readTypeCheckingDouble(inputStorage, ComfDecel))
+            {
+                return server.writeErrorStatusCmd(CMD_SET_VEHICLE_VARIABLE, "ComfDecel requires a double.", outputStorage);
+            }
+
+            std::string vTypeID = v->getVehicleType().getID();
+            std::size_t found = vTypeID.find("@");
+            if (found != std::string::npos)
+                vTypeID.erase(found);
+
+            MSVehicleType* veh = MSNet::getInstance()->getVehicleControl().getVType(vTypeID);
+            veh->getCarFollowModel().setComfDecel(ComfDecel);
+        }
+
+        break;
+
+        // mani ends
+
+
+      case CMD_STOP: {
             if (inputStorage.readUnsignedByte() != TYPE_COMPOUND) {
                 return server.writeErrorStatusCmd(CMD_SET_VEHICLE_VARIABLE, "Stop needs a compound object description.", outputStorage);
             }

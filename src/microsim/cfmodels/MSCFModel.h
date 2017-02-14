@@ -415,6 +415,38 @@ public:
     virtual void setHeadwayTime(SUMOReal headwayTime) {
         myHeadwayTime = headwayTime;
     }
+
+    // mani start
+    virtual int getControllerNumber() const {
+        return -1;
+    }
+
+    virtual int setDelay(SUMOReal a) {
+        throw ProcessError("this method should not be called directly!");
+    }
+
+    virtual void setVint(SUMOReal a) {
+        throw ProcessError("this method should not be called directly!");
+    }
+
+    virtual void setComfAccel(SUMOReal a) {
+        throw ProcessError("this method should not be called directly!");
+    }
+
+    virtual void setComfDecel(SUMOReal a) {
+        throw ProcessError("this method should not be called directly!");
+    }
+
+    virtual void setK_v(SUMOReal a) {
+        throw ProcessError("this method should not be called directly!");
+    }
+
+    virtual void setK_g(SUMOReal a) {
+        throw ProcessError("this method should not be called directly!");
+    }
+
+    // mani end
+
     /// @}
 
     /** @brief Returns the maximum safe velocity for following the given leader

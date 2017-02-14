@@ -76,12 +76,67 @@ class MSLeaderInfo;
 // ===========================================================================
 // class definitions
 // ===========================================================================
+
+// mani
+typedef struct myNeighboringVehicle
+{
+    // a pointer to the vehicle in SUMO
+    const MSVehicle* vehiclePtrSumo;
+
+    // information about this vehicle from OMNET++
+    std::string vehicleNameOmnet;
+    SUMOReal velocityOmnet;
+    SUMOReal maxDecelOmnet;
+    SUMOReal accelOmnet;
+    SUMOTime timeStampOmnet;
+
+    myNeighboringVehicle()
+    {
+        this->vehiclePtrSumo = NULL;
+        this->vehicleNameOmnet = "";
+        this->velocityOmnet = INFINITY;
+        this->maxDecelOmnet = INFINITY;
+        this->accelOmnet = INFINITY;
+        this->timeStampOmnet = -1;
+    }
+
+    myNeighboringVehicle(const MSVehicle* veh, std::string str, SUMOReal b, SUMOReal c, SUMOReal d, SUMOTime e)
+    {
+        this->vehiclePtrSumo = veh;
+        this->vehicleNameOmnet = str;
+        this->velocityOmnet = b;
+        this->maxDecelOmnet = c;
+        this->accelOmnet = d;
+        this->timeStampOmnet = e;
+    }
+
+} myNeighboringVehicle_t;
+
 /**
  * @class MSVehicle
  * @brief Representation of a vehicle in the micro simulation
  */
 class MSVehicle : public MSBaseVehicle {
 public:
+
+    // mani starts
+    
+    // general parameters (set by OMNET++)
+    bool degradeToACC;
+    bool debug;
+    double errorGap;
+    double errorRelSpeed; 
+    
+    // my car-following mode (set by SUMO)
+    int myCFMode; 
+    
+    // important vehicles that I should be aware of
+    myNeighboringVehicle_t followVeh;
+    myNeighboringVehicle_t precedingVeh;
+    myNeighboringVehicle_t platoonLeaderVeh;
+
+    // mani ends
+
 
     /// the lane changer sets myLastLaneChangeOffset
     friend class MSLaneChanger;
