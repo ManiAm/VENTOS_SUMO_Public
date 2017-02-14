@@ -1,0 +1,37 @@
+<?xml version="1.0" encoding="UTF-8"?>
+
+<!-- generated on 11/14/16 16:42:43 by SUMO Version dev-SVN-r21978
+<?xml version="1.0" encoding="UTF-8"?>
+
+<configuration xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:noNamespaceSchemaLocation="http://sumo.dlr.de/xsd/sumoConfiguration.xsd">
+
+    <input>
+        <net-file value="net.net.xml"/>
+        <additional-files value="input_additional.add.xml,input_additional2.add.xml"/>
+    </input>
+
+    <time>
+        <begin value="0"/>
+        <end value="200"/>
+    </time>
+
+    <report>
+        <xml-validation value="never"/>
+        <duration-log.disable value="true"/>
+        <no-step-log value="true"/>
+    </report>
+
+    <traci_server>
+        <remote-port value="55770"/>
+    </traci_server>
+
+</configuration>
+-->
+
+<tls-states xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:noNamespaceSchemaLocation="http://sumo.dlr.de/xsd/tlsstate_file.xsd">
+    <tlsState time="0.00" id="1/1" programID="prog1" phase="0" state="GGGGGGGGGGGGGGGG"/>
+    <tlsState time="1.00" id="1/1" programID="0" phase="0" state="rrrrGGggrrrrGGgg"/>
+    <tlsState time="2.00" id="1/1" programID="prog1" phase="0" state="GGGGGGGGGGGGGGGG"/>
+    <tlsState time="3.00" id="1/1" programID="prog1" phase="0" state="GGGGGGGGGGGGGGGG"/>
+    <tlsState time="4.00" id="1/1" programID="prog1" phase="0" state="GGGGGGGGGGGGGGGG"/>
+</tls-states>
