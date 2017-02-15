@@ -574,7 +574,8 @@ SUMOVehicleParserHelper::getAllowedCFModelAttrs() {
         CACCParams.insert(SUMO_ATTR_KA);
         CACCParams.insert(SUMO_ATTR_VINT);
         CACCParams.insert(SUMO_ATTR_KV_F);
-        CACCParams.insert(SUMO_ATTR_KG_F);        
+        CACCParams.insert(SUMO_ATTR_KG_F);
+        CACCParams.insert(SUMO_ATTR_DEGRADETOACC);
         allowedCFModelAttrs[SUMO_TAG_CF_CACC] = CACCParams;
 
         // mani ends 

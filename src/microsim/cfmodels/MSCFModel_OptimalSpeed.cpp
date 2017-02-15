@@ -21,8 +21,17 @@
 // ===========================================================================
 // method definitions
 // ===========================================================================
-MSCFModel_OptimalSpeed::MSCFModel_OptimalSpeed(const MSVehicleType* vtype, SUMOReal accel, SUMOReal decel, SUMOReal dawdle, SUMOReal tau, SUMOReal sens, SUMOReal desTG)
-    : MSCFModel(vtype, accel, decel, tau), mySensitivity(sens), myDesTimeGap(desTG), myDawdle(dawdle) {
+MSCFModel_OptimalSpeed::MSCFModel_OptimalSpeed(const MSVehicleType* vtype,
+        SUMOReal accel,
+        SUMOReal decel,
+        SUMOReal dawdle,
+        SUMOReal tau,
+        SUMOReal sens,
+        SUMOReal desTG) : MSCFModel(vtype, accel, decel, tau)
+{
+    this->mySensitivity = sens;
+    this->myDesTimeGap = desTG;
+    this->myDawdle = dawdle;
 }
 
 

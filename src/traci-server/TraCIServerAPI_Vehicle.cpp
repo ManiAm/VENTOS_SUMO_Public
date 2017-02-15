@@ -558,7 +558,7 @@ TraCIServerAPI_Vehicle::processSet(TraCIServer& server, tcpip::Storage& inputSto
             && variable != VAR_LINE
             && variable != VAR_VIA
             // mani
-            && variable != 0x15 && variable != 0x16 && variable != 0x17 && variable != 0x20 && variable != 0x21 && variable != 0x22 && variable != 0x23 && variable != 0x24
+            && variable != 0x15 && variable != 0x16 && variable != 0x20 && variable != 0x21 && variable != 0x22 && variable != 0x23 && variable != 0x24
             && variable != MOVE_TO_XY && variable != VAR_PARAMETER/* && variable != VAR_SPEED_TIME_LINE && variable != VAR_LANE_TIME_LINE*/
        ) {
         return server.writeErrorStatusCmd(CMD_SET_VEHICLE_VARIABLE, "Change Vehicle State: unsupported variable " + toHex(variable, 2) + " specified", outputStorage);
@@ -689,28 +689,6 @@ TraCIServerAPI_Vehicle::processSet(TraCIServer& server, tcpip::Storage& inputSto
             }
             
             v->debug = (bool)debugging;  
-        }
-        
-        break;
-        
-        // change modeSwitch variable in a specific vehicle
-        case 0x17: 
-        {   
-            int modeSwitch;
-            
-            if (!server.readTypeCheckingInt(inputStorage, modeSwitch)) 
-            {
-                return server.writeErrorStatusCmd(CMD_SET_VEHICLE_VARIABLE, "modeSwitch requires a int.", outputStorage);
-            }
-            
-            v->degradeToACC = (bool)modeSwitch;  
-            
-            if(v->debug)
-            {           
-                char buffer [900];
-                sprintf (buffer, "%s received data from OMNET++ : degradeToACC=%d", v->getID().c_str(), v->degradeToACC);
-                WRITE_MESSAGE(buffer);  
-            }
         }
         
         break; 

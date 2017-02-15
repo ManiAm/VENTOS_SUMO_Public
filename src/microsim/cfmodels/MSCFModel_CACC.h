@@ -31,7 +31,7 @@ public:
      * @param[in] dawdle The driver imperfection
      * @param[in] tau The driver's reaction time
      */
-    MSCFModel_CACC(const MSVehicleType*, int, SUMOReal, SUMOReal, SUMOReal, SUMOReal, SUMOReal, SUMOReal, SUMOReal, SUMOReal, SUMOReal, SUMOReal, SUMOReal, SUMOReal, SUMOReal);
+    MSCFModel_CACC(const MSVehicleType*, int, SUMOReal, SUMOReal, SUMOReal, SUMOReal, SUMOReal, SUMOReal, SUMOReal, SUMOReal, SUMOReal, SUMOReal, SUMOReal, SUMOReal, SUMOReal, bool);
     
     /// @brief Destructor
     ~MSCFModel_CACC();
@@ -79,6 +79,8 @@ public:
 
 private:
     
+    bool degradeToACC;
+
     SUMOReal myK_a;
     
     // used in bi-directional control

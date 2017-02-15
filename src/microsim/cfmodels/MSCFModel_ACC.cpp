@@ -22,11 +22,27 @@
 // ===========================================================================
 // method definitions
 // ===========================================================================
-MSCFModel_ACC::MSCFModel_ACC(const MSVehicleType* vtype,  int controllerType, SUMOReal MaxAccel, SUMOReal MaxDecel, SUMOReal T_d, SUMOReal tau, SUMOReal ComfAccel, SUMOReal ComfDecel, SUMOReal K_sc, SUMOReal K_v, SUMOReal K_d, SUMOReal V_int)
-    : MSCFModel(vtype, MaxAccel, MaxDecel, T_d), myControllerNumber(controllerType), myDelay(tau), myComfAccel(ComfAccel), myComfDecel(ComfDecel), myK_sc(K_sc), myK_v(K_v), myK_g(K_d), myV_int(V_int)
+MSCFModel_ACC::MSCFModel_ACC(const MSVehicleType* vtype,
+        int controllerType,
+        SUMOReal MaxAccel,
+        SUMOReal MaxDecel,
+        SUMOReal T_d,
+        SUMOReal tau,
+        SUMOReal ComfAccel,
+        SUMOReal ComfDecel,
+        SUMOReal K_sc,
+        SUMOReal K_v,
+        SUMOReal K_d,
+        SUMOReal V_int) : MSCFModel(vtype, MaxAccel, MaxDecel, T_d)
 {
-
-            
+    this->myControllerNumber = controllerType;
+    this->myDelay = tau;
+    this->myComfAccel = ComfAccel;
+    this->myComfDecel = ComfDecel;
+    this->myK_sc = K_sc;
+    this->myK_v = K_v;
+    this->myK_g = K_d;
+    this->myV_int = V_int;
 }
 
 

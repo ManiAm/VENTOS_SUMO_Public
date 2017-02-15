@@ -22,10 +22,27 @@
 // method definitions
 // ===========================================================================
 
-MSCFModel_CACC::MSCFModel_CACC(const MSVehicleType* vtype, int controllerNumber, SUMOReal MaxAccel, SUMOReal MaxDecel, SUMOReal T_d, SUMOReal tau, SUMOReal ComfAccel, SUMOReal ComfDecel, SUMOReal K_sc, SUMOReal K_v, SUMOReal K_d, SUMOReal K_a, SUMOReal V_int, SUMOReal K_v_f, SUMOReal K_g_f)
-          :MSCFModel_ACC(vtype, controllerNumber, MaxAccel, MaxDecel, T_d, tau, ComfAccel, ComfDecel, K_sc, K_v, K_d, V_int), myK_a(K_a), myK_v_f(K_v_f), myK_g_f(K_g_f) 
+MSCFModel_CACC::MSCFModel_CACC(const MSVehicleType* vtype,
+        int controllerNumber,
+        SUMOReal MaxAccel,
+        SUMOReal MaxDecel,
+        SUMOReal T_d,
+        SUMOReal tau,
+        SUMOReal ComfAccel,
+        SUMOReal ComfDecel,
+        SUMOReal K_sc,
+        SUMOReal K_v,
+        SUMOReal K_d,
+        SUMOReal K_a,
+        SUMOReal V_int,
+        SUMOReal K_v_f,
+        SUMOReal K_g_f,
+        bool degradeToACC) : MSCFModel_ACC(vtype, controllerNumber, MaxAccel, MaxDecel, T_d, tau, ComfAccel, ComfDecel, K_sc, K_v, K_d, V_int)
 {
-   
+    this->myK_a = K_a;
+    this->myK_v_f = K_v_f;
+    this->myK_g_f = K_g_f;
+    this->degradeToACC = degradeToACC;
 }
 
 
@@ -324,7 +341,7 @@ MSCFModel_CACC::allDataReceived(MSVehicle* vehAccess, myNeighboringVehicle_t sen
         vehAccess->myCFMode = Mode_DataLoss;
         
         // if degradeToACC is on, switch to ACC
-        if(vehAccess->degradeToACC)
+        if(degradeToACC)
         {
             if(vehAccess->debug)
             {
@@ -555,5 +572,5 @@ MSCFModel_CACC::controllerTwoLogic(MSVehicle* vehAccess, SUMOReal receivedAccel,
 MSCFModel*
 MSCFModel_CACC::duplicate(const MSVehicleType* vtype) const 
 {
-    return new MSCFModel_CACC(vtype, myControllerNumber, myAccel, myDecel, myHeadwayTime, myDelay, myComfAccel, myComfDecel, myK_sc, myK_v, myK_g, myK_a, myV_int, myK_v_f, myK_g_f);
+    return new MSCFModel_CACC(vtype, myControllerNumber, myAccel, myDecel, myHeadwayTime, myDelay, myComfAccel, myComfDecel, myK_sc, myK_v, myK_g, myK_a, myV_int, myK_v_f, myK_g_f, false);
 }

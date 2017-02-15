@@ -18,10 +18,15 @@
 // ===========================================================================
 // method definitions
 // ===========================================================================
-MSCFModel_KraussFixed::MSCFModel_KraussFixed(const MSVehicleType* vtype, SUMOReal MaxAccel, SUMOReal MaxDecel, SUMOReal T_d, SUMOReal sigma, SUMOReal tau)
-    : MSCFModel(vtype, MaxAccel, MaxDecel, T_d), myDawdle(sigma), myDelay(tau)
+MSCFModel_KraussFixed::MSCFModel_KraussFixed(const MSVehicleType* vtype,
+        SUMOReal MaxAccel,
+        SUMOReal MaxDecel,
+        SUMOReal T_d,
+        SUMOReal sigma,
+        SUMOReal tau) : MSCFModel(vtype, MaxAccel, MaxDecel, T_d)
 {
-    
+    this->myDawdle = sigma;
+    this->myDelay = tau;
 }
 
 

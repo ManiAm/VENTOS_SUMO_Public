@@ -462,6 +462,7 @@ enum SumoXMLAttr {
     SUMO_ATTR_VINT,
     SUMO_ATTR_KV_F,
     SUMO_ATTR_KG_F,
+    SUMO_ATTR_DEGRADETOACC,
     // mani ends
 
 

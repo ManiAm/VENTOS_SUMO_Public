@@ -122,7 +122,6 @@ public:
     // mani starts
     
     // general parameters (set by OMNET++)
-    bool degradeToACC;
     bool debug;
     double errorGap;
     double errorRelSpeed; 

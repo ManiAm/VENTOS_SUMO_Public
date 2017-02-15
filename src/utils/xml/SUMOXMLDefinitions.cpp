@@ -317,6 +317,7 @@ StringBijection<int>::Entry SUMOXMLDefinitions::attrs[] = {
    { "V_int",          SUMO_ATTR_VINT },
    { "K_v_f",          SUMO_ATTR_KV_F },
    { "K_g_f",          SUMO_ATTR_KG_F },
+   { "degradeToACC",   SUMO_ATTR_DEGRADETOACC },
    // mani ends
 
 

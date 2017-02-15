@@ -563,7 +563,6 @@ MSVehicle::MSVehicle(SUMOVehicleParameter* pars, const MSRoute* route,
     myCFVariables = type->getCarFollowModel().createVehicleVariables();
 
     // mani starts
-    degradeToACC = false;
     debug = false;
     errorGap = 0;
     errorRelSpeed = 0;
