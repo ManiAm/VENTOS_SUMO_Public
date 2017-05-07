@@ -76,6 +76,14 @@ public:
         return myDawdle;
     }
     
+
+    // mani
+    virtual int getCFModelNumber() const
+    {
+        return SUMO_CF_KRAUSSFIXED;
+    }
+
+
         /// @name Setter methods
     /// @{
     /** @brief Sets a new value for maximum deceleration [m/s^2]

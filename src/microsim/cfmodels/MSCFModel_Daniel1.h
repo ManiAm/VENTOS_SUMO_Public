@@ -107,6 +107,12 @@ public:
     /// @}
 
 
+    // mani
+    virtual int getCFModelNumber() const
+    {
+        return SUMO_CF_DANIEL1;
+    }
+
 
     /// @name Setter methods
     /// @{

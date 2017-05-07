@@ -72,9 +72,9 @@ public:
      */
     virtual MSCFModel* duplicate(const MSVehicleType* vtype) const;
     
-    virtual int getControllerType() const
+    virtual int getCFModelNumber() const
     {
-        return SUMO_TAG_CF_CACC;
+        return SUMO_CF_CACC;
     }
 
 private:

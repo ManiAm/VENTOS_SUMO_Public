@@ -159,11 +159,11 @@ TraCIServerAPI_Vehicle::processGet(TraCIServer& server, tcpip::Storage& inputSto
             // mani starts
             case 0x72:   // get controller type
                 tempMsg.writeUnsignedByte(TYPE_INTEGER);
-                tempMsg.writeInt(onRoad ? v->getCarFollowModel().getModelID() : INVALID_INT_VALUE);
+                tempMsg.writeInt(onRoad ? v->getCarFollowModel().getCFModelNumber() : INVALID_INT_VALUE);
                 break;
             case 0x73:   // get controller number
                 tempMsg.writeUnsignedByte(TYPE_INTEGER);
-                tempMsg.writeInt(onRoad ? v->getCarFollowModel().getControllerNumber() : INVALID_INT_VALUE);
+                tempMsg.writeInt(onRoad ? v->getCarFollowModel().getCFSubModelNumber() : INVALID_INT_VALUE);
                 break;
             case 0x74:   // get the current acceleration
                 tempMsg.writeUnsignedByte(TYPE_DOUBLE);

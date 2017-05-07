@@ -87,7 +87,12 @@ public:
     virtual MSCFModel* duplicate(const MSVehicleType* vtype) const;
     
     
-    virtual int getControllerNumber() const
+    virtual int getCFModelNumber() const
+    {
+        return SUMO_CF_ACC;
+    }
+
+    virtual int getCFSubModelNumber() const
     {
         return myControllerNumber;
     }   

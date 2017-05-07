@@ -108,6 +108,12 @@ public:
     /// @}
 
 
+    // mani
+    virtual int getCFModelNumber() const
+    {
+        return SUMO_CF_PWAGNER2009;
+    }
+
 
     /** @brief Duplicates the car-following model
      * @param[in] vtype The vehicle type this model belongs to (1:1)

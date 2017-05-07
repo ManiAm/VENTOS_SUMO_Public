@@ -88,6 +88,13 @@ public:
     }
     /// @}
 
+    // mani
+    virtual int getCFModelNumber() const
+    {
+        return SUMO_CF_OPTIMALSPEED;
+    }
+
+
     /// @name Setter methods
     /// @{
     /** @brief Sets a new value for maximum deceleration [m/s^2]

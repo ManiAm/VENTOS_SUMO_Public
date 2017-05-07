@@ -108,6 +108,12 @@ public:
     /// @}
 
 
+    // mani
+    virtual int getCFModelNumber() const
+    {
+        return SUMO_CF_SMART_SK;
+    }
+
 
     /// @name Setter methods
     /// @{

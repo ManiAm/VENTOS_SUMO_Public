@@ -123,6 +123,12 @@ public:
     /// @}
 
 
+    // mani
+    virtual int getCFModelNumber() const
+    {
+        return SUMO_CF_KRAUSS_ORIG1;
+    }
+
 
     /// @name Setter methods
     /// @{

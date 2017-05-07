@@ -39,6 +39,28 @@
 
 #define INVALID_SPEED 299792458 + 1 // nothing can go faster than the speed of light!
 
+// mani
+typedef enum carFollowingModel {
+    SUMO_CF_KRAUSS = 0,
+    SUMO_CF_KRAUSS_PLUS_SLOPE,
+    SUMO_CF_KRAUSS_ORIG1,
+    SUMO_CF_SMART_SK,
+    SUMO_CF_DANIEL1,
+    SUMO_CF_IDM,
+    SUMO_CF_IDMM,
+    SUMO_CF_PWAGNER2009,
+    SUMO_CF_BKERNER,
+    SUMO_CF_WIEDEMANN,
+
+    SUMO_CF_OPTIMALSPEED,
+    SUMO_CF_KRAUSSFIXED,
+    SUMO_CF_ACC,
+    SUMO_CF_CACC,
+
+    SUMO_CF_MAX
+} carFollowingModel_t;
+
+
 // ===========================================================================
 // class declarations
 // ===========================================================================
@@ -417,7 +439,11 @@ public:
     }
 
     // mani start
-    virtual int getControllerNumber() const {
+    virtual int getCFModelNumber() const {
+        return -1;
+    }
+
+    virtual int getCFSubModelNumber() const {
         return -1;
     }
 

@@ -86,6 +86,12 @@ public:
     }
     /// @}
 
+    // mani
+    virtual int getCFModelNumber() const
+    {
+        return SUMO_CF_KRAUSS_PLUS_SLOPE;
+    }
+
 
     /** @brief Duplicates the car-following model
      * @param[in] vtype The vehicle type this model belongs to (1:1)
