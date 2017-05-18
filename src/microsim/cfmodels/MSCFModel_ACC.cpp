@@ -23,7 +23,6 @@
 // method definitions
 // ===========================================================================
 MSCFModel_ACC::MSCFModel_ACC(const MSVehicleType* vtype,
-        int controllerType,
         SUMOReal MaxAccel,
         SUMOReal MaxDecel,
         SUMOReal T_d,
@@ -35,7 +34,6 @@ MSCFModel_ACC::MSCFModel_ACC(const MSVehicleType* vtype,
         SUMOReal K_d,
         SUMOReal V_int) : MSCFModel(vtype, MaxAccel, MaxDecel, T_d)
 {
-    this->myControllerNumber = controllerType;
     this->myDelay = tau;
     this->myComfAccel = ComfAccel;
     this->myComfDecel = ComfDecel;
@@ -75,12 +73,6 @@ SUMOReal
 MSCFModel_ACC::followSpeed(const MSVehicle* const veh, SUMOReal speed, SUMOReal gap, SUMOReal predSpeed, SUMOReal predMaxDecel) const 
 {
     // note: when this method is called, it means we definitely have a preceding car.             
-    
-    // check if controller number is set correctly
-    if(getModelID() == SUMO_TAG_CF_ACC && myControllerNumber != 1)
-    {
-        throw ProcessError("controllerNumber for ACC vehicle is wrong!\n");
-    }
     
     // get current simulation time step
     SUMOTime simTime = MSNet::getInstance()->getCurrentTimeStep();
@@ -167,5 +159,5 @@ MSCFModel_ACC::stopSpeed(const MSVehicle* const veh, const SUMOReal speed, SUMOR
 MSCFModel*
 MSCFModel_ACC::duplicate(const MSVehicleType* vtype) const 
 {
-    return new MSCFModel_ACC(vtype, myControllerNumber, myAccel, myDecel, myHeadwayTime, myDelay, myComfAccel, myComfDecel, myK_sc, myK_v, myK_g, myV_int);
+    return new MSCFModel_ACC(vtype, myAccel, myDecel, myHeadwayTime, myDelay, myComfAccel, myComfDecel, myK_sc, myK_v, myK_g, myV_int);
 }

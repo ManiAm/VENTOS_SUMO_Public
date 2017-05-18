@@ -23,7 +23,7 @@
 // ===========================================================================
 
 MSCFModel_CACC::MSCFModel_CACC(const MSVehicleType* vtype,
-        int controllerNumber,
+        int communicationType,
         SUMOReal MaxAccel,
         SUMOReal MaxDecel,
         SUMOReal T_d,
@@ -37,8 +37,9 @@ MSCFModel_CACC::MSCFModel_CACC(const MSVehicleType* vtype,
         SUMOReal V_int,
         SUMOReal K_v_f,
         SUMOReal K_g_f,
-        bool degradeToACC) : MSCFModel_ACC(vtype, controllerNumber, MaxAccel, MaxDecel, T_d, tau, ComfAccel, ComfDecel, K_sc, K_v, K_d, V_int)
+        bool degradeToACC) : MSCFModel_ACC(vtype, MaxAccel, MaxDecel, T_d, tau, ComfAccel, ComfDecel, K_sc, K_v, K_d, V_int)
 {
+    this->myCommunicationType = communicationType;
     this->myK_a = K_a;
     this->myK_v_f = K_v_f;
     this->myK_g_f = K_g_f;
@@ -54,12 +55,6 @@ MSCFModel_CACC::followSpeed(const MSVehicle* const veh, SUMOReal speed, SUMOReal
 {
     // note 1: when this method is called, it means we definitely have a preceding car.         
     // note 2: we should not use variable 'a' directly from SUMO; we need to get it from OMNET++
- 
-    // check if controller number is set correctly
-    if(getModelID() == SUMO_TAG_CF_CACC && myControllerNumber != 1 && myControllerNumber != 2 && myControllerNumber != 3)
-    {
-        throw ProcessError("controllerNumber for CACC vehicle is wrong!\n");        
-    }
     
     // modify vehicle parameters through vehAccess
     SUMOVehicle* sumoVehicle = MSNet::getInstance()->getVehicleControl().getVehicle(veh->getID());
@@ -68,8 +63,8 @@ MSCFModel_CACC::followSpeed(const MSVehicle* const veh, SUMOReal speed, SUMOReal
     // ############################################################
     // Controller 1: CACC with one-vehicle look-ahead communication
     // ############################################################    
-    if(myControllerNumber == 1)
-    {   
+    if(myCommunicationType == 1)
+    {
         // check if we have received all the required data from precedingVeh
         int result = allDataReceived(vehAccess, vehAccess->precedingVeh, speed, gap, predSpeed, predMaxDecel);        
         // switching to ACC
@@ -138,7 +133,7 @@ MSCFModel_CACC::followSpeed(const MSVehicle* const veh, SUMOReal speed, SUMOReal
     // ########################################################
     // Controller 2: CACC with acceleration from platoon leader
     // ######################################################## 
-    else if(myControllerNumber == 2)
+    else if(myCommunicationType == 2)
     {
         // check if we have received all the required data from platoon leader
         int result = allDataReceived(vehAccess, vehAccess->platoonLeaderVeh, speed, gap, predSpeed, predMaxDecel);        
@@ -198,7 +193,7 @@ MSCFModel_CACC::followSpeed(const MSVehicle* const veh, SUMOReal speed, SUMOReal
     // ##############################################
     // Controller 3: CACC with bi-directional control
     // ############################################## 
-    else if(myControllerNumber == 3)
+    else if(myCommunicationType == 3)
     {
         // we need these two parameters for my following vehicle
         SUMOReal followSpeed = -1;
@@ -287,7 +282,11 @@ MSCFModel_CACC::followSpeed(const MSVehicle* const veh, SUMOReal speed, SUMOReal
         
         // calculate following speed
         return controllerTwoLogic(vehAccess, vehAccess->platoonLeaderVeh.accelOmnet, speed, gap, predSpeed, followSpeed, followGap);
-    }    
+    }
+    else
+    {
+        throw ProcessError("Invalid communicationType for CACC vehicle! \n");
+    }
 }
 
 
@@ -572,5 +571,5 @@ MSCFModel_CACC::controllerTwoLogic(MSVehicle* vehAccess, SUMOReal receivedAccel,
 MSCFModel*
 MSCFModel_CACC::duplicate(const MSVehicleType* vtype) const 
 {
-    return new MSCFModel_CACC(vtype, myControllerNumber, myAccel, myDecel, myHeadwayTime, myDelay, myComfAccel, myComfDecel, myK_sc, myK_v, myK_g, myK_a, myV_int, myK_v_f, myK_g_f, false);
+    return new MSCFModel_CACC(vtype, myCommunicationType, myAccel, myDecel, myHeadwayTime, myDelay, myComfAccel, myComfDecel, myK_sc, myK_v, myK_g, myK_a, myV_int, myK_v_f, myK_g_f, false);
 }

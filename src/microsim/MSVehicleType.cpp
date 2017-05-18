@@ -239,7 +239,6 @@ MSVehicleType::build(SUMOVTypeParameter& from) {
         break;
     case SUMO_TAG_CF_ACC:
         vtype->myCarFollowModel = new MSCFModel_ACC(vtype,
-                from.getCFParam(SUMO_ATTR_CONTROLLERNUMBER, 1),
                 from.getCFParam(SUMO_ATTR_MAXACCEL, 3),
                 from.getCFParam(SUMO_ATTR_MAXDECEL, 5),
                 from.getCFParam(SUMO_ATTR_TG, 1.),
@@ -253,7 +252,7 @@ MSVehicleType::build(SUMOVTypeParameter& from) {
         break;
     case SUMO_TAG_CF_CACC:
         vtype->myCarFollowModel = new MSCFModel_CACC(vtype,
-                from.getCFParam(SUMO_ATTR_CONTROLLERNUMBER, 1),
+                from.getCFParam(SUMO_ATTR_COMMUNICATIONTYPE, 1),
                 from.getCFParam(SUMO_ATTR_MAXACCEL, 3),
                 from.getCFParam(SUMO_ATTR_MAXDECEL, 5),
                 from.getCFParam(SUMO_ATTR_TG, 1.),

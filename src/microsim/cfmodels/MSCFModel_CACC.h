@@ -64,6 +64,11 @@ public:
         return SUMO_TAG_CF_CACC;
     }
 
+    virtual int getCommunicationType() const
+    {
+        return myCommunicationType;
+    }
+
     /// @}
     
     /** @brief Duplicates the car-following model
@@ -79,6 +84,7 @@ public:
 
 private:
     
+    int myCommunicationType;
     bool degradeToACC;
 
     SUMOReal myK_a;

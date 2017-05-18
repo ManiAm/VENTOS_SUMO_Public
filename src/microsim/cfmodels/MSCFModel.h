@@ -443,7 +443,7 @@ public:
         return -1;
     }
 
-    virtual int getCFSubModelNumber() const {
+    virtual int getCommunicationType() const {
         return -1;
     }
 

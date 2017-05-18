@@ -545,7 +545,6 @@ SUMOVehicleParserHelper::getAllowedCFModelAttrs() {
         allowedCFModelAttrs[SUMO_TAG_CF_KRAUSSFIXED] = krausFixedParams;        
         
         std::set<SumoXMLAttr> ACCParams;
-        ACCParams.insert(SUMO_ATTR_CONTROLLERNUMBER);
         ACCParams.insert(SUMO_ATTR_MAXACCEL);
         ACCParams.insert(SUMO_ATTR_MAXDECEL);
         ACCParams.insert(SUMO_ATTR_TG);        
@@ -560,7 +559,7 @@ SUMOVehicleParserHelper::getAllowedCFModelAttrs() {
         allowedCFModelAttrs[SUMO_TAG_CF_ACC] = ACCParams;    
         
         std::set<SumoXMLAttr> CACCParams;
-        CACCParams.insert(SUMO_ATTR_CONTROLLERNUMBER);
+        CACCParams.insert(SUMO_ATTR_COMMUNICATIONTYPE);
         CACCParams.insert(SUMO_ATTR_MAXACCEL);
         CACCParams.insert(SUMO_ATTR_MAXDECEL);
         CACCParams.insert(SUMO_ATTR_TG);        

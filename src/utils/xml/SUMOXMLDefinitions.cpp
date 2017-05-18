@@ -303,7 +303,7 @@ StringBijection<int>::Entry SUMOXMLDefinitions::attrs[] = {
 
 
     // mani starts
-   { "controllerNumber", SUMO_ATTR_CONTROLLERNUMBER },
+   { "communicationType", SUMO_ATTR_COMMUNICATIONTYPE },
    { "MaxAccel",       SUMO_ATTR_MAXACCEL },
    { "MaxDecel",       SUMO_ATTR_MAXDECEL },
    { "ComfAccel",      SUMO_ATTR_COMFACCEL },

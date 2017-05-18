@@ -31,7 +31,7 @@ public:
      * @param[in] dawdle The driver imperfection
      * @param[in] tau The driver's reaction time
      */
-    MSCFModel_ACC(const MSVehicleType* vtype, int controllerNumber, SUMOReal MaxAccel, SUMOReal MaxDecel, SUMOReal T_d, SUMOReal tau, SUMOReal ComfAccel, SUMOReal ComfDecel, SUMOReal K_sc, SUMOReal K_v, SUMOReal K_d, SUMOReal V_int);
+    MSCFModel_ACC(const MSVehicleType* vtype, SUMOReal MaxAccel, SUMOReal MaxDecel, SUMOReal T_d, SUMOReal tau, SUMOReal ComfAccel, SUMOReal ComfDecel, SUMOReal K_sc, SUMOReal K_v, SUMOReal K_d, SUMOReal V_int);
 
     /// @brief Destructor
     ~MSCFModel_ACC();
@@ -91,11 +91,6 @@ public:
     {
         return SUMO_CF_ACC;
     }
-
-    virtual int getCFSubModelNumber() const
-    {
-        return myControllerNumber;
-    }   
     
     virtual int setDelay(SUMOReal d)
     {
@@ -128,7 +123,6 @@ public:
     }
     
 protected:    
-    int myControllerNumber;
     SUMOReal myDelay;
     
     SUMOReal myV_int; 

@@ -161,9 +161,9 @@ TraCIServerAPI_Vehicle::processGet(TraCIServer& server, tcpip::Storage& inputSto
                 tempMsg.writeUnsignedByte(TYPE_INTEGER);
                 tempMsg.writeInt(onRoad ? v->getCarFollowModel().getCFModelNumber() : INVALID_INT_VALUE);
                 break;
-            case 0x73:   // get controller number
+            case 0x73:   // get CACC communication type
                 tempMsg.writeUnsignedByte(TYPE_INTEGER);
-                tempMsg.writeInt(onRoad ? v->getCarFollowModel().getCFSubModelNumber() : INVALID_INT_VALUE);
+                tempMsg.writeInt(onRoad ? v->getCarFollowModel().getCommunicationType() : INVALID_INT_VALUE);
                 break;
             case 0x74:   // get the current acceleration
                 tempMsg.writeUnsignedByte(TYPE_DOUBLE);
