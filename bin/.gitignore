@@ -3,7 +3,8 @@
 
 # But not these files...
 !.gitignore
-Makefile.am
-start-command-line.bat
+!Makefile.am
+!start-command-line.bat
+!VENTOS_SUMO
 
 
