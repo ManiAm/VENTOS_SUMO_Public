@@ -53,6 +53,7 @@ public:
     double controller_2(MSVehicle* vehAccess, SUMOReal, SUMOReal, SUMOReal, SUMOReal) const;
     double controller_3(MSVehicle* vehAccess, SUMOReal, SUMOReal, SUMOReal, SUMOReal) const;
 
+    int checkPlatoonConfigTimestamp(MSVehicle*, platoonConfig_t &) const;
     void applyMeasurementError(MSVehicle*, SUMOReal *, SUMOReal, SUMOReal *) const;
     int emergencyBrakeNeeded(MSVehicle*, SUMOReal, SUMOReal, SUMOReal, SUMOReal, SUMOReal) const; 
     double switchToACC(MSVehicle*, SUMOReal, SUMOReal, SUMOReal, SUMOReal) const;

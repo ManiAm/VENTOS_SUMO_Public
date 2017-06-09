@@ -66,7 +66,7 @@ MSCFModel_CACC::followSpeed(const MSVehicle* const veh, SUMOReal speed, SUMOReal
     if(vehAccess->myPlatoonView.platoonId == "")
     {
         char buffer [900];
-        sprintf (buffer, "vehicle '%s' is not part of any platoon! \n", vehAccess->getID().c_str());
+        sprintf (buffer, "vehicle '%s' is not part of any platoon. Follow speed is set to ZERO \n", vehAccess->getID().c_str());
         WRITE_WARNING(buffer);
 
         return 0;
@@ -76,7 +76,7 @@ MSCFModel_CACC::followSpeed(const MSVehicle* const veh, SUMOReal speed, SUMOReal
     if(vehAccess->myPlatoonView.platoonSize <= 0)
     {
         char buffer [900];
-        sprintf (buffer, "vehicle '%s' has an invalid platoon size of '%d' \n", vehAccess->getID().c_str(), vehAccess->myPlatoonView.platoonSize);
+        sprintf (buffer, "vehicle '%s' has an invalid platoon size of '%d'. Follow speed is set to ZERO \n", vehAccess->getID().c_str(), vehAccess->myPlatoonView.platoonSize);
         WRITE_WARNING(buffer);
 
         return 0;
@@ -86,7 +86,7 @@ MSCFModel_CACC::followSpeed(const MSVehicle* const veh, SUMOReal speed, SUMOReal
     if(vehAccess->myPlatoonView.platoonDepth < 0 || vehAccess->myPlatoonView.platoonDepth >= vehAccess->myPlatoonView.platoonSize)
     {
         char buffer [900];
-        sprintf (buffer, "vehicle '%s' has an invalid platoon depth of '%d' \n", vehAccess->getID().c_str(), vehAccess->myPlatoonView.platoonDepth);
+        sprintf (buffer, "vehicle '%s' has an invalid platoon depth of '%d'. Follow speed is set to ZERO \n", vehAccess->getID().c_str(), vehAccess->myPlatoonView.platoonDepth);
         WRITE_WARNING(buffer);
 
         return 0;
@@ -112,7 +112,7 @@ MSCFModel_CACC::controller_1(MSVehicle* vehAccess, SUMOReal speed, SUMOReal gap,
     if(vehAccess->myPlatoonView.platoonDepth == 0)
     {
         char buffer [900];
-        sprintf (buffer, "platoon leader '%s' should not be a CACC vehicle! \n", vehAccess->getID().c_str());
+        sprintf (buffer, "platoon leader '%s' should not be a CACC vehicle. Follow speed is set to ZERO \n", vehAccess->getID().c_str());
         WRITE_WARNING(buffer);
 
         return 0;
@@ -125,7 +125,7 @@ MSCFModel_CACC::controller_1(MSVehicle* vehAccess, SUMOReal speed, SUMOReal gap,
     if(ii == vehAccess->myPlatoonView.platoonConfiguration.end() || ii->second.vehId == "")
     {
         char buffer [900];
-        sprintf (buffer, "cannot get the front vehicle of '%s' \n", vehAccess->getID().c_str());
+        sprintf (buffer, "cannot get the front vehicle of '%s'. Follow speed is set to ZERO \n", vehAccess->getID().c_str());
         WRITE_WARNING(buffer);
 
         return 0;
@@ -133,52 +133,10 @@ MSCFModel_CACC::controller_1(MSVehicle* vehAccess, SUMOReal speed, SUMOReal gap,
 
     platoonConfig_t frontVehConfig = ii->second;
 
-    // get current simulation time step
-    SUMOTime simTime = MSNet::getInstance()->getCurrentTimeStep();
-
-    // no data from the front vehicle
-    // Reason: maybe the front vehicle is not CACC capable
-    if(frontVehConfig.timestamp == -1)
-    {
-        char buffer [900];
-        sprintf (buffer, "SimTime=%.2f: vehicle '%s' has not received any beacons from the front vehicle '%s'",
-                simTime/1000.,
-                vehAccess->getID().c_str(),
-                frontVehConfig.vehId.c_str());
-        WRITE_WARNING(buffer);
-
-        vehAccess->myCFMode = Mode_NoData;
-
-        // we have no choice other than using ACC
-        // even if degradeToACC is off
+    // check if the data from the front vehicle is fresh
+    int rc = checkPlatoonConfigTimestamp(vehAccess, frontVehConfig);
+    if(rc == -1)
         return switchToACC(vehAccess, speed, gap, predSpeed, predMaxDecel);
-    }
-
-    // if the data from the front vehicle is out-dated
-    if( fabs(simTime - frontVehConfig.timestamp)/1000. > invalidTimer)
-    {
-        char buffer [900];
-        sprintf (buffer, "SimTime=%.2f: vehicle '%s' has outdated data from the front vehicle '%s' (invalidTimer=%f) \n"
-                "The last beacon from the front vehicle was received at time '%.6f' \n",
-                simTime/1000.,
-                vehAccess->getID().c_str(),
-                frontVehConfig.vehId.c_str(),
-                invalidTimer,
-                frontVehConfig.timestamp/1000.);
-        WRITE_WARNING(buffer);
-
-        vehAccess->myCFMode = Mode_DataLoss;
-
-        if(degradeToACC)
-            return switchToACC(vehAccess, speed, gap, predSpeed, predMaxDecel);
-
-        if(vehAccess->debug)
-        {
-            char buffer [900];
-            sprintf (buffer, "Degrade to ACC is off. Continue using CACC controller.\n");
-            WRITE_WARNING(buffer);
-        }
-    }
 
     if(vehAccess->debug)
     {
@@ -273,105 +231,145 @@ MSCFModel_CACC::controller_1(MSVehicle* vehAccess, SUMOReal speed, SUMOReal gap,
 double
 MSCFModel_CACC::controller_2(MSVehicle* vehAccess, SUMOReal speed, SUMOReal gap, SUMOReal predSpeed, SUMOReal predMaxDecel) const
 {
-    //    // check if we have received all the required data from platoon leader
-    //    int result = allDataReceived(vehAccess, vehAccess->platoonLeaderVeh, speed, gap, predSpeed, predMaxDecel);
-    //    // switching to ACC
-    //    if(result == -1)
-    //        return MSCFModel_ACC::followSpeed(veh, speed, gap, predSpeed, predMaxDecel);
-    //
-    //    if(veh->debug)
-    //    {
-    //        char buffer1 [900];
-    //        sprintf (buffer1, "--------\n%s\n--------\nController: %s",
-    //                          veh->getID().c_str(),
-    //                          "CACC with acceleration from platoon leader");
-    //        WRITE_MESSAGE(buffer1);
-    //    }
-    //
-    //    // the gap in argument excludes minGap
-    //    // we will add the minGap
-    //    gap = gap + veh->getVehicleType().getMinGap();
-    //
-    //    // apply measurement error
-    //    if(veh->errorGap != 0 || veh->errorRelSpeed != 0)
-    //        applyMeasurementError(vehAccess, &gap, speed, &predSpeed);
-    //
-    //    // printing input values (for debugging purposes)
-    //    if(veh->debug)
-    //    {
-    //        char buffer [900];
-    //        sprintf (buffer, "My parameters: speed=%.3f, accel=%.3f, gap=%.3f",
-    //                         speed,
-    //                         veh->getAcceleration(),
-    //                         gap);
-    //        WRITE_MESSAGE(buffer);
-    //
-    //        char buffer2 [900];
-    //        sprintf (buffer2, "Parameters of preceding vehicle %s: speed=%.3f, maxDecel=%.3f",
-    //                          veh->precedingVeh.vehiclePtrSumo->getID().c_str(),
-    //                          predSpeed,
-    //                          predMaxDecel);
-    //        WRITE_MESSAGE(buffer2);
-    //
-    //        char buffer3 [900];
-    //        sprintf (buffer3, "Parameters of platoon leader %s: accel(wireless)=%.3f",
-    //                          veh->platoonLeaderVeh.vehicleNameOmnet.c_str(),
-    //                          veh->platoonLeaderVeh.accelOmnet);
-    //        WRITE_MESSAGE(buffer3);
-    //    }
-    //
-    //    result = emergencyBrakeNeeded(vehAccess, speed, gap, predSpeed, predMaxDecel, 0);
-    //    // we need emergency break!
-    //    if(result != -1)
-    //        return result;
-    //
-    //    // V_int should not be bigger than 'maximum lane speed' or 'maximum vehicle speed'
-    //    SUMOReal myV_int2 = MIN3( myV_int, vehAccess->getLane()->getVehicleMaxSpeed(vehAccess), vehAccess->getVehicleType().getMaxSpeed() );
-    //
-    //    // desired accel for speed control
-    //    SUMOReal a_des_v = myK_sc * (myV_int2 - speed);
-    //
-    //    // desired accel for gap control
-    //    SUMOReal a_des_g = myK_a * frontVehConfig.accel +
-    //            myK_v * (predSpeed - speed) +
-    //            myK_g * (gap - vehAccess->getVehicleType().getMinGap() - (speed*myHeadwayTime));
-    //
-    //    SUMOReal a_control = MIN2(a_des_v, a_des_g);
-    //
-    //    // get current acceleration of vehicle
-    //    SUMOReal a = vehAccess->getAcceleration();
-    //
-    //    SUMOReal a_des = ( (a_control - a) / myDelay ) * TS + a;
-    //
-    //    // bound a_des to [-ComfDecel, ComfAccel]
-    //    SUMOReal a_veh = MAX2(-myComfDecel, MIN2(a_des,myComfAccel) );
-    //
-    //    SUMOReal followV = speed + ACCEL2SPEED(a_veh);
-    //
-    //    // make sure followV is not negative
-    //    followV = MAX2(0.,followV);
-    //
-    //    // printing output values (for debugging purposes)
-    //    if(vehAccess->debug)
-    //    {
-    //        char buffer2 [900];
-    //        sprintf (buffer2, "Output values: a_des_v=%.3f, a_des_g=%.3f, a_des=%.3f, a_veh=%.3f, followV=%.3f",
-    //                a_des_v,
-    //                a_des_g,
-    //                a_des,
-    //                a_veh,
-    //                followV);
-    //        WRITE_MESSAGE(buffer2);
-    //    }
-    //
-    //    if(followV == 0)
-    //        vehAccess->myCFMode = Mode_Stopped;
-    //    else if(a_des_g < a_des_v)
-    //        vehAccess->myCFMode = Mode_GapControl;
-    //    else
-    //        vehAccess->myCFMode = Mode_SpeedControl;
-    //
-    //    return followV;
+    if(vehAccess->myPlatoonView.platoonDepth == 0)
+    {
+        char buffer [900];
+        sprintf (buffer, "platoon leader '%s' should not be a CACC vehicle. Follow speed is set to ZERO \n", vehAccess->getID().c_str());
+        WRITE_WARNING(buffer);
+
+        return 0;
+    }
+
+    // get the name of the front vehicle
+    int frontVehDepth = vehAccess->myPlatoonView.platoonDepth - 1;
+    typedef std::map<int, platoonConfig_t>::iterator config_i;
+    config_i ii = vehAccess->myPlatoonView.platoonConfiguration.find(frontVehDepth);
+    if(ii == vehAccess->myPlatoonView.platoonConfiguration.end() || ii->second.vehId == "")
+    {
+        char buffer [900];
+        sprintf (buffer, "cannot get the front vehicle of '%s'. Follow speed is set to ZERO \n", vehAccess->getID().c_str());
+        WRITE_WARNING(buffer);
+
+        return 0;
+    }
+
+    platoonConfig_t frontVehConfig = ii->second;
+
+    // check if the data from the front vehicle is fresh
+    int rc = checkPlatoonConfigTimestamp(vehAccess, frontVehConfig);
+    if(rc == -1)
+        return switchToACC(vehAccess, speed, gap, predSpeed, predMaxDecel);
+
+    // get the name of the platoon leader
+    config_i jj = vehAccess->myPlatoonView.platoonConfiguration.find(0);
+    if(jj == vehAccess->myPlatoonView.platoonConfiguration.end() || jj->second.vehId == "")
+    {
+        char buffer [900];
+        sprintf (buffer, "cannot get the platoon leader of vehicle of '%s'. Follow speed is set to ZERO \n", vehAccess->getID().c_str());
+        WRITE_WARNING(buffer);
+
+        return 0;
+    }
+
+    platoonConfig_t platoonLeaderConfig = jj->second;
+
+    // check if the data from the platoon leader is fresh
+    rc = checkPlatoonConfigTimestamp(vehAccess, platoonLeaderConfig);
+    if(rc == -1)
+        return switchToACC(vehAccess, speed, gap, predSpeed, predMaxDecel);
+
+    if(vehAccess->debug)
+    {
+        char buffer1 [900];
+        sprintf (buffer1, "--------\n%s\n--------\nController: %s",
+                vehAccess->getID().c_str(),
+                "CACC with acceleration from platoon leader");
+        WRITE_MESSAGE(buffer1);
+    }
+
+    // the gap in argument excludes minGap. We will add the minGap
+    gap = gap + vehAccess->getVehicleType().getMinGap();
+
+    // apply measurement error
+    if(vehAccess->errorGap != 0 || vehAccess->errorRelSpeed != 0)
+        applyMeasurementError(vehAccess, &gap, speed, &predSpeed);
+
+    // printing input values (for debugging purposes)
+    if(vehAccess->debug)
+    {
+        char buffer [900];
+        sprintf (buffer, "My parameters: speed=%.3f, accel=%.3f, gap=%.3f",
+                speed,
+                vehAccess->getAcceleration(),
+                gap);
+        WRITE_MESSAGE(buffer);
+
+        char buffer2 [900];
+        sprintf (buffer2, "Parameters of the front vehicle '%s': speed=%.3f, maxDecel=%.3f",
+                frontVehConfig.vehId.c_str(),
+                predSpeed,
+                predMaxDecel);
+        WRITE_MESSAGE(buffer2);
+
+        char buffer3 [900];
+        sprintf (buffer3, "Parameters of platoon leader '%s': accel(wireless)=%.3f",
+                platoonLeaderConfig.vehId.c_str(),
+                platoonLeaderConfig.accel);
+        WRITE_MESSAGE(buffer3);
+    }
+
+    int result = emergencyBrakeNeeded(vehAccess, speed, gap, predSpeed, predMaxDecel, 0);
+    // we need emergency break!
+    if(result != -1)
+        return result;
+
+    // V_int should not be bigger than 'maximum lane speed' or 'maximum vehicle speed'
+    SUMOReal myV_int2 = MIN3( myV_int, vehAccess->getLane()->getVehicleMaxSpeed(vehAccess), vehAccess->getVehicleType().getMaxSpeed() );
+
+    // desired accel for speed control
+    SUMOReal a_des_v = myK_sc * (myV_int2 - speed);
+
+    // desired accel for gap control
+    SUMOReal a_des_g = myK_a * platoonLeaderConfig.accel +
+            myK_v * (predSpeed - speed) +
+            myK_g * (gap - vehAccess->getVehicleType().getMinGap() - (speed*myHeadwayTime));
+
+    SUMOReal a_control = MIN2(a_des_v, a_des_g);
+
+    // get current acceleration of vehicle
+    SUMOReal a = vehAccess->getAcceleration();
+
+    SUMOReal a_des = ( (a_control - a) / myDelay ) * TS + a;
+
+    // bound a_des to [-ComfDecel, ComfAccel]
+    SUMOReal a_veh = MAX2(-myComfDecel, MIN2(a_des,myComfAccel) );
+
+    SUMOReal followV = speed + ACCEL2SPEED(a_veh);
+
+    // make sure followV is not negative
+    followV = MAX2(0.,followV);
+
+    // printing output values (for debugging purposes)
+    if(vehAccess->debug)
+    {
+        char buffer2 [900];
+        sprintf (buffer2, "Output values: a_des_v=%.3f, a_des_g=%.3f, a_des=%.3f, a_veh=%.3f, followV=%.3f",
+                a_des_v,
+                a_des_g,
+                a_des,
+                a_veh,
+                followV);
+        WRITE_MESSAGE(buffer2);
+    }
+
+    if(followV == 0)
+        vehAccess->myCFMode = Mode_Stopped;
+    else if(a_des_g < a_des_v)
+        vehAccess->myCFMode = Mode_GapControl;
+    else
+        vehAccess->myCFMode = Mode_SpeedControl;
+
+    return followV;
 }
 
 
@@ -527,6 +525,61 @@ MSCFModel_CACC::controller_3(MSVehicle* vehAccess, SUMOReal speed, SUMOReal gap,
 }
 
 
+// -1: switch to ACC
+//  1: continue
+int
+MSCFModel_CACC::checkPlatoonConfigTimestamp(MSVehicle* vehAccess, platoonConfig_t &vehConfig) const
+{
+    // get current simulation time step
+    SUMOTime simTime = MSNet::getInstance()->getCurrentTimeStep();
+
+    // no data from the front vehicle
+    // Reason: maybe the front vehicle is not CACC capable
+    if(vehConfig.timestamp == -1)
+    {
+        char buffer [900];
+        sprintf (buffer, "SimTime=%.2f: vehicle '%s' has not received any beacons from vehicle '%s'",
+                simTime/1000.,
+                vehAccess->getID().c_str(),
+                vehConfig.vehId.c_str());
+        WRITE_WARNING(buffer);
+
+        vehAccess->myCFMode = Mode_NoData;
+
+        // we have no choice other than using ACC
+        // even if degradeToACC is off
+        return -1;
+    }
+
+    // if the data from the front vehicle is out-dated
+    if( fabs(simTime - vehConfig.timestamp)/1000. > invalidTimer)
+    {
+        char buffer [900];
+        sprintf (buffer, "SimTime=%.2f: vehicle '%s' has outdated data from vehicle '%s' (invalidTimer=%f) \n"
+                "The last beacon from that vehicle was received at time '%.6f' \n",
+                simTime/1000.,
+                vehAccess->getID().c_str(),
+                vehConfig.vehId.c_str(),
+                invalidTimer,
+                vehConfig.timestamp/1000.);
+        WRITE_WARNING(buffer);
+
+        vehAccess->myCFMode = Mode_DataLoss;
+
+        if(degradeToACC)
+            return -1;
+
+        char buffer2 [900];
+        sprintf (buffer2, "vehicle '%s' continue using the CACC controller (Down-grade to ACC is off) \n", vehAccess->getID().c_str());
+        WRITE_WARNING(buffer2);
+
+        return 1;
+    }
+
+    return 1;
+}
+
+
 void
 MSCFModel_CACC::applyMeasurementError(MSVehicle* vehAccess, SUMOReal *gap, SUMOReal speed, SUMOReal *predSpeed) const
 {
@@ -609,25 +662,23 @@ MSCFModel_CACC::emergencyBrakeNeeded(MSVehicle* vehAccess, SUMOReal speed, SUMOR
 double
 MSCFModel_CACC::switchToACC(MSVehicle* vehAccess, SUMOReal speed, SUMOReal gap, SUMOReal predSpeed, SUMOReal predMaxDecel) const
 {
-    if(vehAccess->debug)
-    {
-        char buffer [900];
-        sprintf (buffer, "Degrade to ACC mode\n");
-        WRITE_WARNING(buffer);
-    }
+    char buffer [900];
+    sprintf (buffer, "vehicle '%s' is down-grading to to ACC mode \n", vehAccess->getID().c_str());
+    WRITE_WARNING(buffer);
 
-//    std::string vTypeID = vehAccess->getVehicleType().getID();
-//    std::size_t found = vTypeID.find("@");
-//    if (found != std::string::npos)
-//        vTypeID.erase(found);
-//
-//    // todo: a temporary solution to change parameters
-//    // should change back the parameters once we get out of ACC
-//    MSVehicleType* sumoVehicleType = MSNet::getInstance()->getVehicleControl().getVType(vTypeID);
-//    sumoVehicleType->getCarFollowModel().setHeadwayTime(1.2);
-//    sumoVehicleType->getCarFollowModel().setDelay(0.5);
-//    sumoVehicleType->getCarFollowModel().setK_v(1.0);
-//    sumoVehicleType->getCarFollowModel().setK_g(5.0);
+
+    //    std::string vTypeID = vehAccess->getVehicleType().getID();
+    //    std::size_t found = vTypeID.find("@");
+    //    if (found != std::string::npos)
+    //        vTypeID.erase(found);
+    //
+    //    // todo: a temporary solution to change parameters
+    //    // should change back the parameters once we get out of ACC
+    //    MSVehicleType* sumoVehicleType = MSNet::getInstance()->getVehicleControl().getVType(vTypeID);
+    //    sumoVehicleType->getCarFollowModel().setHeadwayTime(1.2);
+    //    sumoVehicleType->getCarFollowModel().setDelay(0.5);
+    //    sumoVehicleType->getCarFollowModel().setK_v(1.0);
+    //    sumoVehicleType->getCarFollowModel().setK_g(5.0);
 
     return MSCFModel_ACC::followSpeed(vehAccess, speed, gap, predSpeed, predMaxDecel);
 }
