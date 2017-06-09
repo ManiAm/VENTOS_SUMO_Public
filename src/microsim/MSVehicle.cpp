@@ -568,10 +568,11 @@ MSVehicle::MSVehicle(SUMOVehicleParameter* pars, const MSRoute* route,
     errorRelSpeed = 0;
     
     myCFMode = Mode_Undefined;
-    
-    followVeh = myNeighboringVehicle_t();
-    precedingVeh = myNeighboringVehicle_t();
-    platoonLeaderVeh = myNeighboringVehicle_t();
+
+    myPlatoonView.platoonId = "";
+    myPlatoonView.platoonSize = -1;
+    myPlatoonView.platoonDepth = -1;
+
     // mani ends
 }
 

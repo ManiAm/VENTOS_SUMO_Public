@@ -231,16 +231,16 @@ MSVehicleType::build(SUMOVTypeParameter& from) {
         break;
     case SUMO_TAG_CF_KRAUSSFIXED:
         vtype->myCarFollowModel = new MSCFModel_KraussFixed(vtype,
-                from.getCFParam(SUMO_ATTR_MAXACCEL, 3),
-                from.getCFParam(SUMO_ATTR_MAXDECEL, 5),
+                from.getCFParam(SUMO_ATTR_ACCEL, 3),
+                from.getCFParam(SUMO_ATTR_DECEL, 5),
                 from.getCFParam(SUMO_ATTR_TG, 1.),
                 from.getCFParam(SUMO_ATTR_SIGMA, 0.5),
                 from.getCFParam(SUMO_ATTR_TAU, 1.));
         break;
     case SUMO_TAG_CF_ACC:
         vtype->myCarFollowModel = new MSCFModel_ACC(vtype,
-                from.getCFParam(SUMO_ATTR_MAXACCEL, 3),
-                from.getCFParam(SUMO_ATTR_MAXDECEL, 5),
+                from.getCFParam(SUMO_ATTR_ACCEL, 3),
+                from.getCFParam(SUMO_ATTR_DECEL, 5),
                 from.getCFParam(SUMO_ATTR_TG, 1.),
                 from.getCFParam(SUMO_ATTR_TAU, 1.),
                 from.getCFParam(SUMO_ATTR_COMFACCEL, 2),
@@ -252,9 +252,9 @@ MSVehicleType::build(SUMOVTypeParameter& from) {
         break;
     case SUMO_TAG_CF_CACC:
         vtype->myCarFollowModel = new MSCFModel_CACC(vtype,
-                from.getCFParam(SUMO_ATTR_COMMUNICATIONTYPE, 1),
-                from.getCFParam(SUMO_ATTR_MAXACCEL, 3),
-                from.getCFParam(SUMO_ATTR_MAXDECEL, 5),
+                from.getCFParam(SUMO_ATTR_STRATEGY, 1),
+                from.getCFParam(SUMO_ATTR_ACCEL, 3),
+                from.getCFParam(SUMO_ATTR_DECEL, 5),
                 from.getCFParam(SUMO_ATTR_TG, 1.),
                 from.getCFParam(SUMO_ATTR_TAU, 1.),
                 from.getCFParam(SUMO_ATTR_COMFACCEL, 2),
@@ -266,7 +266,8 @@ MSVehicleType::build(SUMOVTypeParameter& from) {
                 from.getCFParam(SUMO_ATTR_VINT, 30),
                 from.getCFParam(SUMO_ATTR_KV_F, 1),
                 from.getCFParam(SUMO_ATTR_KG_F, 1),
-                from.getCFParam(SUMO_ATTR_DEGRADETOACC, 0 /*false*/));
+                from.getCFParam(SUMO_ATTR_DEGRADETOACC, 0 /*false*/),
+                from.getCFParam(SUMO_ATTR_INVALIDTIMER, 0.1));
         break;
         // mani ends
 

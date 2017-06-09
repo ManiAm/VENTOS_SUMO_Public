@@ -31,7 +31,7 @@ public:
      * @param[in] dawdle The driver imperfection
      * @param[in] tau The driver's reaction time
      */
-    MSCFModel_CACC(const MSVehicleType*, int, SUMOReal, SUMOReal, SUMOReal, SUMOReal, SUMOReal, SUMOReal, SUMOReal, SUMOReal, SUMOReal, SUMOReal, SUMOReal, SUMOReal, SUMOReal, bool);
+    MSCFModel_CACC(const MSVehicleType*, int, SUMOReal, SUMOReal, SUMOReal, SUMOReal, SUMOReal, SUMOReal, SUMOReal, SUMOReal, SUMOReal, SUMOReal, SUMOReal, SUMOReal, SUMOReal, bool, SUMOReal);
     
     /// @brief Destructor
     ~MSCFModel_CACC();
@@ -49,11 +49,13 @@ public:
      */
     virtual SUMOReal followSpeed(const MSVehicle* const veh, SUMOReal speed, SUMOReal gap2pred, SUMOReal predSpeed, SUMOReal predMaxDecel) const;
     
-    int allDataReceived(MSVehicle*, myNeighboringVehicle_t, SUMOReal, SUMOReal, SUMOReal, SUMOReal) const;
+    double controller_1(MSVehicle* vehAccess, SUMOReal, SUMOReal, SUMOReal, SUMOReal) const;
+    double controller_2(MSVehicle* vehAccess, SUMOReal, SUMOReal, SUMOReal, SUMOReal) const;
+    double controller_3(MSVehicle* vehAccess, SUMOReal, SUMOReal, SUMOReal, SUMOReal) const;
+
     void applyMeasurementError(MSVehicle*, SUMOReal *, SUMOReal, SUMOReal *) const;
     int emergencyBrakeNeeded(MSVehicle*, SUMOReal, SUMOReal, SUMOReal, SUMOReal, SUMOReal) const; 
-    SUMOReal controllerOneLogic(MSVehicle*, SUMOReal, SUMOReal, SUMOReal, SUMOReal) const;
-    SUMOReal controllerTwoLogic(MSVehicle*, SUMOReal, SUMOReal, SUMOReal, SUMOReal, SUMOReal, SUMOReal) const;
+    double switchToACC(MSVehicle*, SUMOReal, SUMOReal, SUMOReal, SUMOReal) const;
     
     /** @brief Returns the model's name
      * @return The model's name
@@ -66,7 +68,7 @@ public:
 
     virtual int getCommunicationType() const
     {
-        return myCommunicationType;
+        return myStrategy;
     }
 
     /// @}
@@ -84,8 +86,9 @@ public:
 
 private:
     
-    int myCommunicationType;
+    int myStrategy;
     bool degradeToACC;
+    SUMOReal invalidTimer;
 
     SUMOReal myK_a;
     

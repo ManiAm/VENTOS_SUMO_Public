@@ -77,40 +77,26 @@ class MSLeaderInfo;
 // class definitions
 // ===========================================================================
 
-// mani
-typedef struct myNeighboringVehicle
+// mani starts
+
+typedef struct platoonConfig
 {
-    // a pointer to the vehicle in SUMO
-    const MSVehicle* vehiclePtrSumo;
+    double timestamp;
+    std::string vehId;
+    double speed;
+    double accel;
+    double maxDecel;
+} platoonConfig_t;
 
-    // information about this vehicle from OMNET++
-    std::string vehicleNameOmnet;
-    SUMOReal velocityOmnet;
-    SUMOReal maxDecelOmnet;
-    SUMOReal accelOmnet;
-    SUMOTime timeStampOmnet;
+typedef struct platoonView
+{
+    std::string platoonId;
+    int platoonSize;
+    int platoonDepth;
+    std::map<int /*depth*/, platoonConfig_t> platoonConfiguration;
+} platoonView_t;
 
-    myNeighboringVehicle()
-    {
-        this->vehiclePtrSumo = NULL;
-        this->vehicleNameOmnet = "";
-        this->velocityOmnet = INFINITY;
-        this->maxDecelOmnet = INFINITY;
-        this->accelOmnet = INFINITY;
-        this->timeStampOmnet = -1;
-    }
-
-    myNeighboringVehicle(const MSVehicle* veh, std::string str, SUMOReal b, SUMOReal c, SUMOReal d, SUMOTime e)
-    {
-        this->vehiclePtrSumo = veh;
-        this->vehicleNameOmnet = str;
-        this->velocityOmnet = b;
-        this->maxDecelOmnet = c;
-        this->accelOmnet = d;
-        this->timeStampOmnet = e;
-    }
-
-} myNeighboringVehicle_t;
+// mani ends
 
 /**
  * @class MSVehicle
@@ -127,12 +113,9 @@ public:
     double errorRelSpeed; 
     
     // my car-following mode (set by SUMO)
-    int myCFMode; 
-    
-    // important vehicles that I should be aware of
-    myNeighboringVehicle_t followVeh;
-    myNeighboringVehicle_t precedingVeh;
-    myNeighboringVehicle_t platoonLeaderVeh;
+    int myCFMode;
+
+    platoonView_t myPlatoonView;
 
     // mani ends
 

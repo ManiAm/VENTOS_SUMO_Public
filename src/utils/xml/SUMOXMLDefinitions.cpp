@@ -303,9 +303,7 @@ StringBijection<int>::Entry SUMOXMLDefinitions::attrs[] = {
 
 
     // mani starts
-   { "communicationType", SUMO_ATTR_COMMUNICATIONTYPE },
-   { "MaxAccel",       SUMO_ATTR_MAXACCEL },
-   { "MaxDecel",       SUMO_ATTR_MAXDECEL },
+   { "strategy",       SUMO_ATTR_STRATEGY },
    { "ComfAccel",      SUMO_ATTR_COMFACCEL },
    { "ComfDecel",      SUMO_ATTR_COMFDECEL },
    { "T_g",            SUMO_ATTR_TG },
@@ -318,6 +316,7 @@ StringBijection<int>::Entry SUMOXMLDefinitions::attrs[] = {
    { "K_v_f",          SUMO_ATTR_KV_F },
    { "K_g_f",          SUMO_ATTR_KG_F },
    { "degradeToACC",   SUMO_ATTR_DEGRADETOACC },
+   { "invalidTimer",   SUMO_ATTR_INVALIDTIMER },
    // mani ends
 
 
