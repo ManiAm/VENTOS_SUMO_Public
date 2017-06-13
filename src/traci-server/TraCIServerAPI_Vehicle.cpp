@@ -659,7 +659,10 @@ TraCIServerAPI_Vehicle::processSet(TraCIServer& server, tcpip::Storage& inputSto
                     {
                         // construct vehicle's name
                         char buffer [900];
-                        sprintf (buffer, "%s.%d", myPlnID.c_str(), i);
+                        if(i == 0)
+                            sprintf (buffer, "%s", myPlnID.c_str());
+                        else
+                            sprintf (buffer, "%s.%d", myPlnID.c_str(), i);
 
                         platoonConfig_t config = {};
 
