@@ -558,7 +558,7 @@ TraCIServerAPI_Vehicle::processSet(TraCIServer& server, tcpip::Storage& inputSto
             && variable != VAR_LINE
             && variable != VAR_VIA
             // mani
-            && variable != 0x15 && variable != 0x16 && variable != 0x20 && variable != 0x21 && variable != 0x22 && variable != 0x23 && variable != 0x24 && variable != 0x25
+            && variable != 0x15 && variable != 0x16 && variable != 0x20 && variable != 0x21 && variable != 0x22 && variable != 0x23 && variable != 0x24 && variable != 0x26 && variable != 0x25
             && variable != MOVE_TO_XY && variable != VAR_PARAMETER/* && variable != VAR_SPEED_TIME_LINE && variable != VAR_LANE_TIME_LINE*/
        ) {
         return server.writeErrorStatusCmd(CMD_SET_VEHICLE_VARIABLE, "Change Vehicle State: unsupported variable " + toHex(variable, 2) + " specified", outputStorage);
@@ -581,11 +581,82 @@ TraCIServerAPI_Vehicle::processSet(TraCIServer& server, tcpip::Storage& inputSto
     }
     const bool onInit = v == 0 || v->getLane() == 0;
     switch (variable) {
-        
 
         // mani starts       
         
-        // init/join/leave this vehicle to/from a platoon
+        // init the platoon
+        case 0x26:
+        {
+            std::string plnSize_str;
+
+            if (!server.readTypeCheckingString(inputStorage, plnSize_str))
+            {
+                return server.writeErrorStatusCmd(CMD_SET_VEHICLE_VARIABLE, "vehiclePlatoonInit requires a string.", outputStorage);
+            }
+
+            // convert stream to usable data type
+            int plnSize = atoi(plnSize_str.c_str());
+
+            if(v->myPlatoonView.platoonId != "")
+            {
+                char buffer [900];
+                sprintf (buffer, "vehicle '%s' is already part of platoon '%s'. \n",
+                         v->getID().c_str(),
+                         v->myPlatoonView.platoonId.c_str());
+                WRITE_WARNING(buffer);
+
+                break;
+            }
+
+            // construct platoon member names
+            std::vector<std::string> pltMemberIds;
+            for(int i = 0; i < plnSize; i++)
+            {
+                // construct vehicle's name
+                char buffer [900];
+                if(i == 0)
+                    sprintf (buffer, "%s", v->getID().c_str());
+                else
+                    sprintf (buffer, "%s.%d", v->getID().c_str(), i);
+
+                pltMemberIds.push_back(std::string(buffer));
+            }
+
+            for(int i = 0; i < plnSize; i++)
+            {
+                SUMOVehicle* sumoVehicle = MSNet::getInstance()->getVehicleControl().getVehicle(pltMemberIds[i]);
+                MSVehicle* veh = dynamic_cast<MSVehicle*>(sumoVehicle);
+
+                veh->myPlatoonView.platoonId = pltMemberIds[0];
+                veh->myPlatoonView.platoonSize = plnSize;
+                veh->myPlatoonView.platoonDepth = i;
+
+                if(v->debug)
+                {
+                    char buffer [900];
+                    sprintf (buffer, "vehicle '%s' is inserted as a member in platoon '%s' of size '%d'", veh->getID().c_str(), pltMemberIds[0].c_str(), plnSize);
+                    WRITE_MESSAGE(buffer);
+                }
+
+                for(int j = 0; j < plnSize; j++)
+                {
+                    platoonConfig_t config = {};
+
+                    // -1 means we did not receive any data
+                    config.timestamp = -1;
+                    config.vehId = pltMemberIds[j];
+                    config.speed = -1;
+                    config.accel = -1;
+                    config.maxDecel = -1;
+
+                    veh->myPlatoonView.platoonConfiguration[j] = config;
+                }
+            }
+        }
+
+        break;
+
+        // join/leave this vehicle to/from a platoon
         case 0x25:
         {
             std::string str;
@@ -744,7 +815,7 @@ TraCIServerAPI_Vehicle::processSet(TraCIServer& server, tcpip::Storage& inputSto
             
             if (!server.readTypeCheckingString(inputStorage, str)) 
             {
-                return server.writeErrorStatusCmd(CMD_SET_VEHICLE_VARIABLE, "Platoon view requires a string.", outputStorage);
+                return server.writeErrorStatusCmd(CMD_SET_VEHICLE_VARIABLE, "vehiclePlatoonViewUpdate requires a string.", outputStorage);
             }
 
             // tokenize!
@@ -756,7 +827,6 @@ TraCIServerAPI_Vehicle::processSet(TraCIServer& server, tcpip::Storage& inputSto
             std::stringstream maxDecel_str;
             std::stringstream myPlnID_str;
             std::stringstream myPlnDepth_str;
-            std::stringstream plnSize_str;
             
             int count = 0;
             
@@ -784,12 +854,10 @@ TraCIServerAPI_Vehicle::processSet(TraCIServer& server, tcpip::Storage& inputSto
                     myPlnID_str << str[i];
                 else if(count == 7)
                     myPlnDepth_str << str[i];
-                else if(count == 8)
-                    plnSize_str << str[i];
             }           
 
-            if(count != 8)
-                return server.writeErrorStatusCmd(CMD_SET_VEHICLE_VARIABLE, "vehicleUpdatePlatoonView expects 8 parameters.", outputStorage);
+            if(count != 7)
+                return server.writeErrorStatusCmd(CMD_SET_VEHICLE_VARIABLE, "vehiclePlatoonViewUpdate expects 7 parameters.", outputStorage);
 
             // data from the vehicle in the same platoon
             double timeStamp = atof(timeStamp_str.str().c_str());
@@ -802,21 +870,11 @@ TraCIServerAPI_Vehicle::processSet(TraCIServer& server, tcpip::Storage& inputSto
             // my own platoon data
             std::string myPlnID = myPlnID_str.str();
             int myPlnDepth = atoi(myPlnDepth_str.str().c_str());
-            int plnSize = atoi(plnSize_str.str().c_str());
 
             if(v->myPlatoonView.platoonId != myPlnID)
             {
                 char buffer [900];
                 sprintf (buffer, "TraCI: vehicle '%s' received a beacon with mismatching platoon id", v->getID().c_str());
-                WRITE_WARNING(buffer);
-
-                break;
-            }
-
-            if(v->myPlatoonView.platoonSize != plnSize)
-            {
-                char buffer [900];
-                sprintf (buffer, "TraCI: vehicle '%s' received a beacon with mismatching platoon size", v->getID().c_str());
                 WRITE_WARNING(buffer);
 
                 break;
