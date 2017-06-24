@@ -32,7 +32,7 @@ public:
      * @param[in] dawdle The driver imperfection
      * @param[in] tau The driver's reaction time
      */
-    MSCFModel_OptimalSpeed(const MSVehicleType* vtype, SUMOReal accel, SUMOReal decel, SUMOReal dawdle, SUMOReal headwayTime, SUMOReal sens, SUMOReal desTG);
+    MSCFModel_OptimalSpeed(const MSVehicleType* vtype, SUMOReal accel, SUMOReal decel, SUMOReal headwayTime, SUMOReal dawdle, SUMOReal sens);
 
 
     /// @brief Destructor
@@ -146,7 +146,6 @@ protected:
     SUMOReal myTauDecel;
     
     SUMOReal mySensitivity;
-    SUMOReal myDesTimeGap;
 };
 
 #endif	/* MSCFModel_KraussOrig1_H */

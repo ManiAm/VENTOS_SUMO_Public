@@ -224,24 +224,23 @@ MSVehicleType::build(SUMOVTypeParameter& from) {
         vtype->myCarFollowModel = new MSCFModel_OptimalSpeed(vtype,
                 from.getCFParam(SUMO_ATTR_ACCEL, 3),
                 from.getCFParam(SUMO_ATTR_DECEL, 5),
-                from.getCFParam(SUMO_ATTR_TG, 1.),
-                from.getCFParam(SUMO_ATTR_SIGMA, 0.5),
                 from.getCFParam(SUMO_ATTR_TAU, 1.),
+                from.getCFParam(SUMO_ATTR_SIGMA, 0.5),
                 from.getCFParam(SUMO_ATTR_SENSITIVITY, 1.) );
         break;
     case SUMO_TAG_CF_KRAUSSFIXED:
         vtype->myCarFollowModel = new MSCFModel_KraussFixed(vtype,
                 from.getCFParam(SUMO_ATTR_ACCEL, 3),
                 from.getCFParam(SUMO_ATTR_DECEL, 5),
-                from.getCFParam(SUMO_ATTR_TG, 1.),
+                from.getCFParam(SUMO_ATTR_TAU, 1.),
                 from.getCFParam(SUMO_ATTR_SIGMA, 0.5),
-                from.getCFParam(SUMO_ATTR_TAU, 1.));
+                from.getCFParam(SUMO_ATTR_CONTROLLERDELAY, 1.));
         break;
     case SUMO_TAG_CF_ACC:
         vtype->myCarFollowModel = new MSCFModel_ACC(vtype,
                 from.getCFParam(SUMO_ATTR_ACCEL, 3),
                 from.getCFParam(SUMO_ATTR_DECEL, 5),
-                from.getCFParam(SUMO_ATTR_TG, 1.),
+                from.getCFParam(SUMO_ATTR_TAU, 1.),
                 from.getCFParam(SUMO_ATTR_CONTROLLERDELAY, 1.),
                 from.getCFParam(SUMO_ATTR_COMFACCEL, 2),
                 from.getCFParam(SUMO_ATTR_COMFDECEL, 3),
@@ -255,7 +254,7 @@ MSVehicleType::build(SUMOVTypeParameter& from) {
                 from.getCFParam(SUMO_ATTR_STRATEGY, 1),
                 from.getCFParam(SUMO_ATTR_ACCEL, 3),
                 from.getCFParam(SUMO_ATTR_DECEL, 5),
-                from.getCFParam(SUMO_ATTR_TG, 1.),
+                from.getCFParam(SUMO_ATTR_TAU, 1.),
                 from.getCFParam(SUMO_ATTR_CONTROLLERDELAY, 1.),
                 from.getCFParam(SUMO_ATTR_COMFACCEL, 2),
                 from.getCFParam(SUMO_ATTR_COMFDECEL, 3),

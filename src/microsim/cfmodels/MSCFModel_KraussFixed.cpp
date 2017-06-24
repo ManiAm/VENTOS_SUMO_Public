@@ -21,12 +21,12 @@
 MSCFModel_KraussFixed::MSCFModel_KraussFixed(const MSVehicleType* vtype,
         SUMOReal MaxAccel,
         SUMOReal MaxDecel,
-        SUMOReal T_d,
+        SUMOReal tau,
         SUMOReal sigma,
-        SUMOReal tau) : MSCFModel(vtype, MaxAccel, MaxDecel, T_d)
+        SUMOReal delay) : MSCFModel(vtype, MaxAccel, MaxDecel, tau)
 {
     this->myDawdle = sigma;
-    this->myDelay = tau;
+    this->myDelay = delay;
 }
 
 
@@ -122,7 +122,7 @@ MSCFModel_KraussFixed::_vsafe(SUMOReal gap, SUMOReal predSpeed, SUMOReal predMax
 MSCFModel*
 MSCFModel_KraussFixed::duplicate(const MSVehicleType* vtype) const 
 {
-    return new MSCFModel_KraussFixed(vtype, myAccel, myDecel, myDawdle, myHeadwayTime, myDelay);
+    return new MSCFModel_KraussFixed(vtype, myAccel, myDecel, myHeadwayTime, myDawdle, myDelay);
 }
 
 

@@ -25,14 +25,14 @@
 MSCFModel_ACC::MSCFModel_ACC(const MSVehicleType* vtype,
         SUMOReal MaxAccel,
         SUMOReal MaxDecel,
-        SUMOReal T_d,
+        SUMOReal tau,
         SUMOReal delay,
         SUMOReal ComfAccel,
         SUMOReal ComfDecel,
         SUMOReal K_sc,
         SUMOReal K_v,
         SUMOReal K_d,
-        SUMOReal V_int) : MSCFModel(vtype, MaxAccel, MaxDecel, T_d)
+        SUMOReal V_int) : MSCFModel(vtype, MaxAccel, MaxDecel, tau)
 {
     this->myDelay = delay;
     this->myComfAccel = ComfAccel;

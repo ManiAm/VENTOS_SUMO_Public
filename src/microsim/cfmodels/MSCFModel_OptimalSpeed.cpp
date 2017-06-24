@@ -24,13 +24,11 @@
 MSCFModel_OptimalSpeed::MSCFModel_OptimalSpeed(const MSVehicleType* vtype,
         SUMOReal accel,
         SUMOReal decel,
-        SUMOReal dawdle,
         SUMOReal tau,
-        SUMOReal sens,
-        SUMOReal desTG) : MSCFModel(vtype, accel, decel, tau)
+        SUMOReal dawdle,
+        SUMOReal sens) : MSCFModel(vtype, accel, decel, tau)
 {
     this->mySensitivity = sens;
-    this->myDesTimeGap = desTG;
     this->myDawdle = dawdle;
 }
 
@@ -66,7 +64,7 @@ MSCFModel_OptimalSpeed::followSpeed(const MSVehicle* const veh, SUMOReal speed, 
     
     // note that gap = g - minGap (g is the actual distance between two vehicles)
     
-    SUMOReal v_des = MAX2(0., MIN2(gap/myDesTimeGap,myType->getMaxSpeed()) );
+    SUMOReal v_des = MAX2(0., MIN2(gap/myHeadwayTime,myType->getMaxSpeed()) );
     SUMOReal acceleration = (v_des - speed) * mySensitivity;    
     SUMOReal follow = speed + ACCEL2SPEED(acceleration);  
     
@@ -91,7 +89,7 @@ MSCFModel_OptimalSpeed::dawdle(SUMOReal speed) const {
 
 MSCFModel*
 MSCFModel_OptimalSpeed::duplicate(const MSVehicleType* vtype) const {
-    return new MSCFModel_OptimalSpeed(vtype, myAccel, myDecel, myDawdle, myHeadwayTime, mySensitivity, myDesTimeGap);
+    return new MSCFModel_OptimalSpeed(vtype, myAccel, myDecel, myHeadwayTime, myDawdle, mySensitivity);
 }
 
 
