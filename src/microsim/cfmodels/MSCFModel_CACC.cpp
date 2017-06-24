@@ -27,7 +27,7 @@ MSCFModel_CACC::MSCFModel_CACC(const MSVehicleType* vtype,
         SUMOReal MaxAccel,
         SUMOReal MaxDecel,
         SUMOReal T_d,
-        SUMOReal tau,
+        SUMOReal delay,
         SUMOReal ComfAccel,
         SUMOReal ComfDecel,
         SUMOReal K_sc,
@@ -38,7 +38,7 @@ MSCFModel_CACC::MSCFModel_CACC(const MSVehicleType* vtype,
         SUMOReal K_v_f,
         SUMOReal K_g_f,
         bool degradeToACC,
-        SUMOReal invalidTimer) : MSCFModel_ACC(vtype, MaxAccel, MaxDecel, T_d, tau, ComfAccel, ComfDecel, K_sc, K_v, K_d, V_int)
+        SUMOReal invalidTimer) : MSCFModel_ACC(vtype, MaxAccel, MaxDecel, T_d, delay, ComfAccel, ComfDecel, K_sc, K_v, K_d, V_int)
 {
     this->myStrategy = myStrategy;
     this->myK_a = K_a;

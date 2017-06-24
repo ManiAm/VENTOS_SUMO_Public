@@ -549,7 +549,7 @@ SUMOVehicleParserHelper::getAllowedCFModelAttrs() {
         ACCParams.insert(SUMO_ATTR_DECEL);
         ACCParams.insert(SUMO_ATTR_TG);        
         ACCParams.insert(SUMO_ATTR_SIGMA);
-        ACCParams.insert(SUMO_ATTR_TAU);        
+        ACCParams.insert(SUMO_ATTR_CONTROLLERDELAY);
         ACCParams.insert(SUMO_ATTR_COMFACCEL);
         ACCParams.insert(SUMO_ATTR_COMFDECEL);        
         ACCParams.insert(SUMO_ATTR_KSC);
@@ -564,7 +564,7 @@ SUMOVehicleParserHelper::getAllowedCFModelAttrs() {
         CACCParams.insert(SUMO_ATTR_DECEL);
         CACCParams.insert(SUMO_ATTR_TG);        
         CACCParams.insert(SUMO_ATTR_SIGMA);
-        CACCParams.insert(SUMO_ATTR_TAU);        
+        CACCParams.insert(SUMO_ATTR_CONTROLLERDELAY);
         CACCParams.insert(SUMO_ATTR_COMFACCEL);
         CACCParams.insert(SUMO_ATTR_COMFDECEL);        
         CACCParams.insert(SUMO_ATTR_KSC);
