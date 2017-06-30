@@ -62,6 +62,10 @@ enum GUIEventType {
         The reason and the time step are stored within the event */
     EVENT_SIMULATION_ENDED,
 
+    // mani
+    EVENT_OPENVIEW,
+    // mani
+
     /** @brief Send when a screenshot is requested;
         View and file name are stored within the event */
     EVENT_SCREENSHOT,

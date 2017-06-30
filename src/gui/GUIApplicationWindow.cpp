@@ -1195,6 +1195,13 @@ GUIApplicationWindow::eventOccured() {
             case EVENT_SIMULATION_ENDED:
                 handleEvent_SimulationEnded(e);
                 break;
+
+            // mani
+            case EVENT_OPENVIEW:
+                handleOpenNewView(e);
+                break;
+            //mani
+
             case EVENT_SCREENSHOT:
                 handleEvent_Screenshot(e);
                 break;
@@ -1364,6 +1371,21 @@ GUIApplicationWindow::handleEvent_SimulationEnded(GUIEvent* e) {
         myHaveNotifiedAboutSimEnd = true;
     }
 }
+
+
+// mani
+void
+GUIApplicationWindow::handleOpenNewView(GUIEvent* e) {
+
+    myEventMutex.lock();
+
+    openNewView(GUISUMOViewParent::VIEW_2D_OPENGL);
+
+    myEventCondition.signal();
+    myEventMutex.unlock();
+}
+
+// mani
 
 
 void

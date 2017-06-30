@@ -43,6 +43,7 @@
 #include <guisim/GUIVehicle.h>
 #include <guisim/GUIBaseVehicle.h>
 #include "GUIEvent_Screenshot.h"
+#include "GUIEvent_NewView.h"  // mani
 #include "TraCIServerAPI_GUI.h"
 
 #ifdef CHECK_MEMORY_LEAKS
@@ -122,6 +123,7 @@ TraCIServerAPI_GUI::processSet(TraCIServer& server, tcpip::Storage& inputStorage
     int variable = inputStorage.readUnsignedByte();
     if (variable != VAR_VIEW_ZOOM && variable != VAR_VIEW_OFFSET && variable != VAR_VIEW_SCHEMA && variable != VAR_VIEW_BOUNDARY
             && variable != VAR_SCREENSHOT && variable != VAR_TRACK_VEHICLE
+            && variable != 0xa7 // mani
        ) {
         return server.writeErrorStatusCmd(CMD_SET_GUI_VARIABLE, "Change GUI State: unsupported variable " + toHex(variable, 2) + " specified", outputStorage);
     }
@@ -133,6 +135,29 @@ TraCIServerAPI_GUI::processSet(TraCIServer& server, tcpip::Storage& inputStorage
     }
     // process
     switch (variable) {
+
+        // mani
+
+        case 0xa7: {
+            std::string newViewID;
+            if (!server.readTypeCheckingString(inputStorage, newViewID)) {
+                return server.writeErrorStatusCmd(CMD_SET_GUI_VARIABLE, "The viewID variable must be a string.", outputStorage);
+            }
+
+            GUIMainWindow* const mw = GUIMainWindow::getInstance();
+            if (mw == 0) return 1;
+
+            // get all current views
+            std::vector<std::string> allViews = mw->getViewIDs();
+
+            std::vector<std::string>::iterator it = std::find(allViews.begin(), allViews.end(), newViewID);
+            if(it == allViews.end())
+                mw->sendBlockingEvent(new GUIEvent_NewView(v));
+        }
+        break;
+
+        // mani
+
         case VAR_VIEW_ZOOM: {
             Position off, p;
             double zoom = 1;

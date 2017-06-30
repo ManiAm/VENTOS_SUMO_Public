@@ -123,6 +123,8 @@ public:
     void handleEvent_SimulationStep(GUIEvent* e);
     void handleEvent_Message(GUIEvent* e);
     void handleEvent_SimulationEnded(GUIEvent* e);
+    // mani
+    void handleOpenNewView(GUIEvent* e);
     void handleEvent_Screenshot(GUIEvent* e);
     /// @}
 
