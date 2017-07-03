@@ -558,7 +558,7 @@ TraCIServerAPI_Vehicle::processSet(TraCIServer& server, tcpip::Storage& inputSto
             && variable != VAR_LINE
             && variable != VAR_VIA
             // mani
-            && variable != 0x15 && variable != 0x16 && variable != 0x20 && variable != 0x21 && variable != 0x22 && variable != 0x23 && variable != 0x24 && variable != 0x26 && variable != 0x25
+            && variable != 0x15 && variable != 0x16 && variable != 0x20 && variable != 0x21 && variable != 0x22 && variable != 0x23 && variable != 0x24 && variable != 0x26
             && variable != MOVE_TO_XY && variable != VAR_PARAMETER/* && variable != VAR_SPEED_TIME_LINE && variable != VAR_LANE_TIME_LINE*/
        ) {
         return server.writeErrorStatusCmd(CMD_SET_VEHICLE_VARIABLE, "Change Vehicle State: unsupported variable " + toHex(variable, 2) + " specified", outputStorage);
@@ -587,228 +587,120 @@ TraCIServerAPI_Vehicle::processSet(TraCIServer& server, tcpip::Storage& inputSto
         // init the platoon
         case 0x26:
         {
-            std::string plnSize_str;
-
-            if (!server.readTypeCheckingString(inputStorage, plnSize_str))
-            {
-                return server.writeErrorStatusCmd(CMD_SET_VEHICLE_VARIABLE, "vehiclePlatoonInit requires a string.", outputStorage);
+            std::vector<std::string> pltMemberIds;
+            if (!server.readTypeCheckingStringList(inputStorage, pltMemberIds)) {
+                return server.writeErrorStatusCmd(CMD_SET_VEHICLE_VARIABLE, "A string list is needed for vehiclePlatoonInit", outputStorage);
             }
 
-            // convert stream to usable data type
-            int plnSize = atoi(plnSize_str.c_str());
-
-            if(v->myPlatoonView.platoonId != "")
+            if(pltMemberIds.empty())
             {
                 char buffer [900];
-                sprintf (buffer, "vehicle '%s' is already part of platoon '%s'. \n",
-                         v->getID().c_str(),
-                         v->myPlatoonView.platoonId.c_str());
+                sprintf (buffer, "vehicle '%s' sent an empty platoon member list. \n",
+                             v->getID().c_str());
                 WRITE_WARNING(buffer);
 
                 break;
             }
 
-            // construct platoon member names
-            std::vector<std::string> pltMemberIds;
-            for(int i = 0; i < plnSize; i++)
+            // make sure the platoon leader is calling this
+            if(pltMemberIds[0] != v->getID())
             {
-                // construct vehicle's name
                 char buffer [900];
-                if(i == 0)
-                    sprintf (buffer, "%s", v->getID().c_str());
-                else
-                    sprintf (buffer, "%s.%d", v->getID().c_str(), i);
+                sprintf (buffer, "vehicle '%s' is trying to register platoon '%s' and it's not a leader. \n",
+                             v->getID().c_str(),
+                             pltMemberIds[0].c_str());
+                WRITE_WARNING(buffer);
 
-                pltMemberIds.push_back(std::string(buffer));
+                break;
             }
+
+            int plnSize = pltMemberIds.size();
 
             for(int i = 0; i < plnSize; i++)
             {
                 SUMOVehicle* sumoVehicle = MSNet::getInstance()->getVehicleControl().getVehicle(pltMemberIds[i]);
                 MSVehicle* veh = dynamic_cast<MSVehicle*>(sumoVehicle);
 
+                if(v->debug)
+                {
+                    if(veh->myPlatoonView.platoonId == "")
+                    {
+                        char buffer [900];
+                        sprintf (buffer, "vehicle '%s' is now part of platoon '%s' with size '%d' \n", veh->getID().c_str(), pltMemberIds[0].c_str(), plnSize);
+                        WRITE_MESSAGE(buffer);
+                    }
+                    else if(veh->myPlatoonView.platoonId != pltMemberIds[0])
+                    {
+                        char buffer [900];
+                        sprintf (buffer, "vehicle '%s' is now part of a new platoon '%s' with size '%d' \n", veh->getID().c_str(), pltMemberIds[0].c_str(), plnSize);
+                        WRITE_MESSAGE(buffer);
+                    }
+                    else if(veh->myPlatoonView.platoonDepth != i)
+                    {
+                        char buffer [900];
+                        sprintf (buffer, "vehicle '%s' is now in depth '%d' of the same platoon '%s' \n", veh->getID().c_str(), i, pltMemberIds[0].c_str());
+                        WRITE_MESSAGE(buffer);
+                    }
+                    else if(veh->myPlatoonView.platoonSize != plnSize)
+                    {
+                        std::string relSize = (plnSize > veh->myPlatoonView.platoonSize) ? "bigger" : "smaller";
+
+                        char buffer [900];
+                        sprintf (buffer, "vehicle '%s' is now part of a %s platoon \n", veh->getID().c_str(), relSize.c_str());
+                        WRITE_MESSAGE(buffer);
+                    }
+                }
+
                 veh->myPlatoonView.platoonId = pltMemberIds[0];
                 veh->myPlatoonView.platoonSize = plnSize;
                 veh->myPlatoonView.platoonDepth = i;
 
-                if(v->debug)
-                {
-                    char buffer [900];
-                    sprintf (buffer, "vehicle '%s' is inserted as a member in platoon '%s' of size '%d'", veh->getID().c_str(), pltMemberIds[0].c_str(), plnSize);
-                    WRITE_MESSAGE(buffer);
-                }
+                // copy the current platoon configuration
+                std::map<int /*depth*/, platoonConfig_t> platoonConfiguration_old;
+                platoonConfiguration_old.insert(veh->myPlatoonView.platoonConfiguration.begin(), veh->myPlatoonView.platoonConfiguration.end());
 
+                // and then clear it
+                veh->myPlatoonView.platoonConfiguration.clear();
+
+                // iterate over the new platoon members
                 for(int j = 0; j < plnSize; j++)
                 {
-                    platoonConfig_t config = {};
-
-                    // -1 means we did not receive any data
-                    config.timestamp = -1;
-                    config.vehId = pltMemberIds[j];
-                    config.speed = -1;
-                    config.accel = -1;
-                    config.maxDecel = -1;
-
-                    veh->myPlatoonView.platoonConfiguration[j] = config;
-                }
-            }
-        }
-
-        break;
-
-        // join/leave this vehicle to/from a platoon
-        case 0x25:
-        {
-            std::string str;
-
-            if (!server.readTypeCheckingString(inputStorage, str))
-            {
-                return server.writeErrorStatusCmd(CMD_SET_VEHICLE_VARIABLE, "init/join/leave requires a string.", outputStorage);
-            }
-
-            // tokenize!
-            std::stringstream action_str;
-            std::stringstream myPlnID_str;
-            std::stringstream plnSize_str;
-            std::stringstream myPlnDepth_str;
-
-            int count = 0;
-
-            for(int i = 0; i < str.length(); i++)
-            {
-                if(str[i] == '#')
-                {
-                    count++;
-                    continue;
-                }
-
-                if(count == 0)
-                    action_str << str[i];
-                else if(count == 1)
-                    myPlnID_str << str[i];
-                else if(count == 2)
-                    plnSize_str << str[i];
-                else if(count == 3)
-                    myPlnDepth_str << str[i];
-            }
-
-            std::string action = action_str.str();
-
-            if(action != "INIT" && action != "JOIN" && action != "LEAVE")
-                return server.writeErrorStatusCmd(CMD_SET_VEHICLE_VARIABLE, "first argument is invalid.", outputStorage);
-
-            if(action == "INIT" && count != 3)
-                return server.writeErrorStatusCmd(CMD_SET_VEHICLE_VARIABLE, "platoon init expects 4 parameters.", outputStorage);
-
-            if(action == "JOIN" && count != 3)
-                return server.writeErrorStatusCmd(CMD_SET_VEHICLE_VARIABLE, "platoon join expects 4 parameters.", outputStorage);
-
-            if(action == "LEAVE" && count != 0)
-                return server.writeErrorStatusCmd(CMD_SET_VEHICLE_VARIABLE, "platoon leave expects 1 parameters.", outputStorage);
-
-            // convert stream to usable data type
-            std::string myPlnID = myPlnID_str.str();
-            int plnSize = atoi(plnSize_str.str().c_str());
-            int myPlnDepth = atoi(myPlnDepth_str.str().c_str());
-
-            if(action == "INIT")
-            {
-                if(v->myPlatoonView.platoonId == "")
-                {
-                    v->myPlatoonView.platoonId = myPlnID;
-                    v->myPlatoonView.platoonSize = plnSize;
-                    v->myPlatoonView.platoonDepth = myPlnDepth;
-
-                    if(v->debug)
+                    // iterate over the old platoon configuration looking for vehicle 'pltMemberIds[j]'
+                    unsigned int k = 0;
+                    bool found = false;
+                    for(k = 0; k < platoonConfiguration_old.size(); ++k)
                     {
-                        char buffer [900];
-                        sprintf (buffer, "vehicle '%s' is inserted as a member of platoon '%s' of size '%d'", v->getID().c_str(), myPlnID.c_str(), plnSize);
-                        WRITE_MESSAGE(buffer);
+                        if(platoonConfiguration_old[k].vehId == pltMemberIds[j])
+                        {
+                            found = true;
+                            break;
+                        }
                     }
 
-                    for(int i = 0; i < plnSize; i++)
+                    if(found)
                     {
-                        // construct vehicle's name
-                        char buffer [900];
-                        if(i == 0)
-                            sprintf (buffer, "%s", myPlnID.c_str());
-                        else
-                            sprintf (buffer, "%s.%d", myPlnID.c_str(), i);
-
+                        veh->myPlatoonView.platoonConfiguration[j] = platoonConfiguration_old[k];
+                    }
+                    else
+                    {
                         platoonConfig_t config = {};
 
                         // -1 means we did not receive any data
                         config.timestamp = -1;
-                        config.vehId = std::string(buffer);
+                        config.vehId = pltMemberIds[j];
                         config.speed = -1;
                         config.accel = -1;
                         config.maxDecel = -1;
 
-                        v->myPlatoonView.platoonConfiguration[i] = config;
+                        veh->myPlatoonView.platoonConfiguration[j] = config;
                     }
-                }
-                else
-                {
-                    char buffer [900];
-                    sprintf (buffer, "vehicle '%s' cannot initialize to platoon '%s', because it is already part of platoon '%s'. \n",
-                                 v->getID().c_str(),
-                                 myPlnID.c_str(),
-                                 v->myPlatoonView.platoonId.c_str());
-                    WRITE_WARNING(buffer);
-                }
-            }
-            else if(action == "JOIN")
-            {
-                if(v->myPlatoonView.platoonId == "")
-                {
-                    v->myPlatoonView.platoonId = myPlnID;
-                    v->myPlatoonView.platoonSize = plnSize;
-                    v->myPlatoonView.platoonDepth = myPlnDepth;
-
-                    if(v->debug)
-                    {
-                        char buffer [900];
-                        sprintf (buffer, "vehicle '%s' is now in position '%d' of platoon '%s' with size '%d' \n",
-                                     v->getID().c_str(),
-                                     myPlnDepth,
-                                     myPlnID.c_str(),
-                                     plnSize);
-                        WRITE_MESSAGE(buffer);
-                    }
-                }
-                else
-                {
-                    char buffer [900];
-                    sprintf (buffer, "vehicle '%s' cannot join platoon '%s', because it is already part of platoon '%s'. "
-                                 "Did you forget to call vehicleLeavePlatoon? \n",
-                                 v->getID().c_str(),
-                                 myPlnID.c_str(),
-                                 v->myPlatoonView.platoonId.c_str());
-                    WRITE_WARNING(buffer);
-                }
-            }
-            else if(action == "LEAVE")
-            {
-                if(v->myPlatoonView.platoonId == "")
-                {
-                    char buffer [900];
-                    sprintf (buffer, "vehicle '%s' cannot leave, because it is not part of any platoon. \n",
-                                 v->getID().c_str());
-                    WRITE_WARNING(buffer);
-                }
-                else
-                {
-                    v->myPlatoonView.platoonId = "";
-                    v->myPlatoonView.platoonSize = -1;
-                    v->myPlatoonView.platoonDepth = -1;
-                    v->myPlatoonView.platoonConfiguration.clear();
                 }
             }
         }
 
         break;
 
-        // update platoon view from the received beacon
+        // update my platoon view from the received beacon
         case 0x15: 
         {            
             std::string str;
@@ -871,36 +763,20 @@ TraCIServerAPI_Vehicle::processSet(TraCIServer& server, tcpip::Storage& inputSto
             std::string myPlnID = myPlnID_str.str();
             int myPlnDepth = atoi(myPlnDepth_str.str().c_str());
 
+            // I receive a beacon with mismatching platoon id
             if(v->myPlatoonView.platoonId != myPlnID)
-            {
-                char buffer [900];
-                sprintf (buffer, "TraCI: vehicle '%s' received a beacon with mismatching platoon id", v->getID().c_str());
-                WRITE_WARNING(buffer);
-
                 break;
-            }
 
+            // I receive a beacon with mismatching platoon depth
             if(v->myPlatoonView.platoonDepth != myPlnDepth)
-            {
-                char buffer [900];
-                sprintf (buffer, "TraCI: vehicle '%s' received a beacon with mismatching platoon depth", v->getID().c_str());
-                WRITE_WARNING(buffer);
-
                 break;
-            }
 
             // look for the sender vehicle in my platoonView
             typedef std::map<int, platoonConfig_t>::iterator config_i;
             config_i ii = v->myPlatoonView.platoonConfiguration.find(plnDepth);
+            // we receive a beacon from vehicle 'vehId' in depth 'plnDepth' that is not in the same platoon
             if(ii == v->myPlatoonView.platoonConfiguration.end() || ii->second.vehId != vehId)
-            {
-                char buffer [900];
-                sprintf (buffer, "TraCI: vehicle '%s' received beacon from vehicle '%s' "
-                        "in depth '%d' that is not in the same platoon \n", v->getID().c_str(), vehId.c_str(), plnDepth);
-                WRITE_WARNING(buffer);
-
                 break;
-            }
 
             // update my view from the sender vehicle
             ii->second.timestamp = timeStamp;

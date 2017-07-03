@@ -115,6 +115,8 @@ public:
     // my car-following mode (set by SUMO)
     int myCFMode;
 
+    bool caller_getSafeFollowSpeed;
+
     platoonView_t myPlatoonView;
 
     // mani ends

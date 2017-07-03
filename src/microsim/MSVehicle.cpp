@@ -568,6 +568,7 @@ MSVehicle::MSVehicle(SUMOVehicleParameter* pars, const MSRoute* route,
     errorRelSpeed = 0;
     
     myCFMode = Mode_Undefined;
+    caller_getSafeFollowSpeed = false;
 
     myPlatoonView.platoonId = "";
     myPlatoonView.platoonSize = -1;
@@ -1817,7 +1818,18 @@ MSVehicle::getSafeFollowSpeed(const std::pair<const MSVehicle*, SUMOReal> leader
     const MSCFModel& cfModel = getCarFollowModel();
     SUMOReal vsafeLeader = 0;
     if (leaderInfo.second >= 0) {
+
+        // mani: followSpeed is also called from lane change model
+        // this is a workaround to notify followSpeed that getSafeFollowSpeed is the caller
+        SUMOVehicle* sumoVehicle = MSNet::getInstance()->getVehicleControl().getVehicle(this->getID());
+        MSVehicle* vehAccess = dynamic_cast<MSVehicle*>(sumoVehicle);
+        vehAccess->caller_getSafeFollowSpeed = true;
+
         vsafeLeader = cfModel.followSpeed(this, getSpeed(), leaderInfo.second, leaderInfo.first->getSpeed(), leaderInfo.first->getCarFollowModel().getMaxDecel());
+
+        // mani
+        vehAccess->caller_getSafeFollowSpeed = false;
+
     } else {
         // the leading, in-lapping vehicle is occupying the complete next lane
         // stop before entering this lane
