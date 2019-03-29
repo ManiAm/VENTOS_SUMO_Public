@@ -34,6 +34,7 @@
 #define eA 0.0001   //Epsilon for angles
 #define eK 0.0001   //Epsilon for curvature
 #define K_LARGE 100000 //large curvature value
+#define HUGE K_LARGE
 
 class BiArcParams
 {
